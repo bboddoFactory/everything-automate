@@ -48,3 +48,5 @@ covers:
   M1 contract for stage transitions and the v0 decision engine.
 - `docs/specs/everything-automate-runtime-flow.md`
   M2 document connecting the v0 contracts into an actual outer flow and inner loop runtime sequence.
+- `docs/specs/everything-automate-provider-entry-bootstrap-mapping.md`
+  M3 document defining provider-specific install surfaces, entry files, bootstrap mechanisms, and the shared intake boundary.
