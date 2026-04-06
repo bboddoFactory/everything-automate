@@ -1,40 +1,40 @@
 ---
 name: brainstorming
-description: Standalone idea-shaping workflow for early design thinking, option comparison, and scope clarification before planning.
+description: Help turn a vague idea into a clearer direction before planning.
 argument-hint: "<idea, feature direction, or vague request>"
 ---
 
 # brainstorming
 
-Turn a vague idea into a clearer product or design direction before formal planning.
+Use this when the user has an idea, but it is still too fuzzy to plan.
 
 ## Purpose
 
-Use brainstorming when the user needs help shaping the work, not yet sequencing the work.
+Use brainstorming when the user needs help deciding what they want before turning it into a real plan.
 
 Brainstorming should:
 
-- clarify user intent
-- surface constraints and non-goals early
-- explore multiple plausible directions
-- recommend a direction with tradeoffs
-- leave behind a clean design brief that can later feed `$planning`
+- clarify what the user is really trying to achieve
+- surface limits and non-goals early
+- explore a few realistic directions
+- recommend one direction and explain the tradeoffs
+- leave behind a short brief that can later feed `$planning`
 
-Brainstorming is upstream of planning.
-It is not implementation and it is not execution planning.
+Brainstorming comes before planning.
+It is not implementation and it is not step-by-step execution planning.
 
 ## Use When
 
-- the user has an idea but not yet a concrete execution shape
+- the user has an idea but not yet a clear plan
 - the user wants to compare approaches before planning
-- the request is exploratory, product-oriented, or design-oriented
+- the request is exploratory, product-focused, or design-focused
 - scope feels fuzzy enough that planning would be premature
 - the user explicitly asks to brainstorm
 
 ## Do Not Use When
 
 - the request is already concrete enough for `$planning`
-- the user already has a clear approved design and wants an execution plan
+- the user already has a clear direction and wants an execution plan
 - the task is only to review an existing plan
 
 ## Interaction Policy
@@ -42,17 +42,17 @@ It is not implementation and it is not execution planning.
 Brainstorming is interactive by default.
 
 - Ask one question at a time.
-- Prefer high-leverage questions over broad questionnaires.
+- Prefer one strong question over a long checklist.
 - Do not ask the user for codebase facts that can be explored directly.
-- If the request is brownfield, ground yourself first with `explorer`.
-- Once enough clarity exists, stop interviewing and move into option generation and recommendation.
+- If the request touches an existing codebase, ground yourself first with `explorer`.
+- Once the direction is clear enough, stop asking and move into options and recommendation.
 
 ## Default Flow
 
 ```text
 request
-  -> quick context intake
-  -> explorer if codebase grounding helps
+  -> quick context check
+  -> explorer if repo context helps
   -> one-question-at-a-time clarification
   -> identify intent / constraints / non-goals
   -> propose 2-3 directions
@@ -67,13 +67,13 @@ request
 ## Rules
 
 - Do not implement during brainstorming.
-- Do not jump into execution-order details too early.
+- Do not jump into implementation steps too early.
 - Clarify why the user wants the change before narrowing how to build it.
 - Ask about scope boundaries and non-goals before polishing solution details.
 - Explore the codebase before asking technical questions the repository can answer.
 - Offer 2-3 options unless the space is obviously binary or heavily constrained.
 - Lead with your recommended option and explain why.
-- Keep the conversation collaborative, but converge toward a final recommendation.
+- Keep the conversation collaborative, but aim to end with one clear recommendation.
 
 ## Suggested Question Order
 
@@ -86,13 +86,13 @@ When clarification is needed, prefer this order:
 5. constraints
 6. decision boundaries
 
-Do not mechanically ask all categories if the answer is already discoverable or implied with high confidence.
+Do not ask every category by default if the answer is already obvious from context or easy to explore.
 
 ## Output
 
-Brainstorming should end with a concise brainstorm brief containing:
+Brainstorming should end with a short brief containing:
 
-- problem or opportunity statement
+- problem or opportunity
 - user intent
 - desired outcome
 - in-scope
@@ -107,7 +107,7 @@ Brainstorming should end with a concise brainstorm brief containing:
 
 Brainstorming does not produce the final execution plan.
 
-If the user wants to proceed after the direction is chosen:
+If the user wants to move forward after the direction is chosen:
 
 ```text
 brainstorming
@@ -115,13 +115,13 @@ brainstorming
   -> $planning
 ```
 
-If the user only wanted ideation or comparison, stop after the brainstorm brief.
+If the user only wanted ideation or comparison, stop after the brief.
 
 ## Completion
 
 Brainstorming is complete when:
 
-- the user understands the viable options
+- the user understands the main options
 - one direction is recommended clearly
 - scope and non-goals are visible enough to avoid premature planning mistakes
 - the next step is explicit: stop, refine further, or move to `$planning`

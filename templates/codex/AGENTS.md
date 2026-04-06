@@ -35,6 +35,17 @@ under the hood
 plan -> execute -> verify -> decide
 ```
 
+## Language Rule
+
+Use simple English by default.
+
+- prefer common words over abstract framework words
+- write so non-native English speakers can follow quickly
+- keep important terms stable, but explain them in simple words around them
+- use the same rule in skill text, setup text, and direct user-facing explanations
+
+If a middle-school-level reader cannot follow the wording, it is too hard.
+
 ## Current Status
 
 Primary in-session workflow surface:

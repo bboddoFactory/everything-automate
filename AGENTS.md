@@ -53,6 +53,20 @@ Write so that:
 
 Do not write documents as short-lived conversation residue.
 
+### Use simple English in user-facing writing
+
+When writing skills, harness prompts, setup text, runtime assets, or direct explanations in English:
+
+- prefer simple, common English words
+- write so a non-native English speaker can follow it quickly
+- avoid abstract framework words when a plain verb or noun will do
+- prefer direct instructions over clever wording
+- keep important terms stable, but explain them in simple language around them
+- use the same rule when speaking to the user in English, not only when writing template files
+
+The default target is readability for someone who is not fluent in English.
+If a middle-school-level reader cannot follow it, the wording is too hard.
+
 ### Templates own distributable behavior
 
 If a behavior is meant to ship to users, it should be authored in the template layer.

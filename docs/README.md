@@ -52,6 +52,8 @@ covers:
   M2 document connecting the v0 contracts into an actual outer flow and inner loop runtime sequence.
 - `docs/specs/everything-automate-codex-execution-model.md`
   Codex-first operating model defining in-session planning, external EA launcher execution, and the initial `ea codex ...` command surface.
+- `docs/specs/everything-automate-codex-execute-hardening.md`
+  Current M5 working document for validating and strengthening the Codex `execute` contract, especially handoff consumption, verify/decide semantics, retry, and state/runtime gaps.
 - `docs/specs/everything-automate-provider-entry-bootstrap-mapping.md`
   M3 document defining provider-specific install surfaces, entry files, bootstrap mechanisms, and the shared intake boundary.
 - `docs/specs/everything-automate-resume-cancel-contract.md`

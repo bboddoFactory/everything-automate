@@ -1,24 +1,24 @@
 ---
 name: execute
-description: C-lite execution workflow that consumes an approved plan handoff, works AC-first, and loops through execute, verify, decide, and fix with bounded retry and explicit terminal outcomes.
+description: Carry an approved plan through implementation, verification, and completion with clear retry and stop rules.
 argument-hint: "[plan path or approved task]"
 ---
 
 # execute
 
-Consume an approved planning handoff and carry the work to verified completion without reopening upstream design decisions.
+Use an approved plan to finish the work without reopening decisions that planning already settled.
 
 ## Purpose
 
-`execute` is the primary execution surface after `$planning`.
+`execute` is the main work phase after `$planning`.
 
 Its job is to:
 
-- consume an approved plan handoff
-- respect planning decisions instead of replanning inside execution
+- read an approved plan
+- follow the plan instead of drifting back into planning
 - work AC-first
 - require fresh evidence before completion
-- keep retry, blocker, and terminal semantics explicit
+- keep retry, blocker, and end-state rules explicit
 - leave a usable progress or terminal summary
 
 ## Use When
@@ -38,18 +38,17 @@ Its job is to:
 
 If any of the above are true, stop and return to `$planning`.
 
-## Core Contract
+## Core Flow
 
-`execute` is a new canonical `C-lite` / Ralph-lite executor for `everything-automate`.
-
-It uses prior systems as references, but it is not a renamed `implement` and it is not a full Ralph runtime.
+`execute` is the standard execution skill for `everything-automate`.
+It is lighter than a full Ralph runtime, but stricter than a plain "implement this" step.
 
 ```text
 $planning
-  -> approved handoff
+  -> approved plan
   -> $execute
-     -> readiness check
-     -> context intake
+     -> entry check
+     -> quick context recap
      -> select AC
      -> execute
      -> verify
@@ -59,12 +58,12 @@ $planning
         -> blocker: stop or escalate
         -> scope drift: fold in if still in-bound, otherwise return to planning
      -> repeat
-  -> terminal or partial-progress summary
+  -> final or partial summary
 ```
 
 ## Input Contract
 
-`execute` consumes the approved plan handoff.
+`execute` reads the approved plan.
 
 Minimum fields:
 
@@ -82,24 +81,57 @@ Minimum fields:
 - `recommended_direction`
 - explicit unit-of-work source: `AC` or `story->AC`
 
-## Entry Readiness Check
+## Entry Check
 
 Do not start real execution until all of the following are true:
 
-- approved handoff is present
+- the approved plan is present
 - approval is explicit
 - execution unit is explicit
 - acceptance criteria exist
 - verification steps are concrete enough to run
 - non-goals and decision boundaries are visible
 - major open risks are understood
-- no missing decision context would force execution to reopen already-set direction choices
+- no missing context would force execution to reopen decisions that planning already made
 
-If readiness fails:
+If the entry check fails:
 
 - do not start implementation
-- report the missing readiness items clearly
+- report the missing items clearly
 - return the work to `$planning`
+
+Typical entry failures include:
+
+- `approval_state` is not `approved`
+- the final handoff block exists but one or more required fields are missing
+- acceptance criteria exist but are not concrete enough to execute
+- verification steps are too weak to prove completion
+- decision boundaries are missing, so execution would be forced to re-open planning
+
+## If Entry Fails
+
+If `execute` refuses to start, say so clearly instead of drifting into partial work.
+
+At minimum, report:
+
+- `status: refused`
+- refusal reason
+- missing or failing entry checks
+- whether the work should return to `$planning`
+
+Example shape:
+
+```text
+execute status: refused
+reason: approval_state is draft
+missing items:
+  - explicit approval
+next action:
+  - return to $planning
+```
+
+Do not soften this into "can probably continue."
+If the entry check fails, execution does not begin.
 
 ## Execution Rules
 
@@ -112,7 +144,7 @@ If readiness fails:
 
 ## Default Flow
 
-### 1. Context Intake
+### 1. Quick Context Recap
 
 Before touching code, restate:
 
@@ -123,9 +155,9 @@ Before touching code, restate:
 - verification path for this AC
 
 This is not replanning.
-It is a short execution grounding pass.
+It is a short recap before doing the work.
 
-### 2. Select the Next Unit
+### 2. Pick the Next AC
 
 Pick the next unfinished AC.
 
@@ -137,7 +169,7 @@ Allowed statuses for a unit:
 - `blocked`
 - `failed_verification`
 
-### 3. Execute
+### 3. Do the Work
 
 Implement only the work needed for the current AC.
 
@@ -145,7 +177,7 @@ If small discovered sub-work is still inside the current AC and inside existing 
 
 If discovered work crosses boundaries, stop and return to `$planning`.
 
-### 4. Verify
+### 4. Check the Result
 
 Fresh evidence is always required.
 
@@ -183,13 +215,13 @@ Retry is bounded.
 Per AC:
 
 - allow up to 3 fix-and-reverify cycles
-- if the same verification failure keeps recurring without a materially new approach, stop escalating locally
+- if the same verification failure keeps recurring without a meaningfully new approach, stop retrying locally
 - if evidence shows the plan itself is insufficient, return to `$planning`
 - if the blocker is external, permission-based, or requirement-based, stop and report it
 
 Do not loop forever.
 
-## Reviewer Verification Floor
+## When Reviewer Verification Is Required
 
 Fresh evidence is mandatory for every run.
 
@@ -205,11 +237,11 @@ Treat the following as reviewer-required by default:
 - architecture-shaping changes
 - broad multi-file changes where local evidence alone is too weak
 
-## Progress and Summary Contract
+## Progress and Summary
 
 Progress must stay visible at the AC level.
 
-At minimum, execution should keep clear track of:
+At minimum, keep clear track of:
 
 - current AC
 - completed ACs
@@ -217,7 +249,7 @@ At minimum, execution should keep clear track of:
 - failed-verification ACs
 - latest evidence used
 
-## Terminal Outcomes
+## End States
 
 ### `complete`
 
@@ -282,7 +314,7 @@ Interruption summary must include:
 
 `execute` is complete only when:
 
-- the approved handoff has been honored
+- the approved plan has been honored
 - all required ACs are resolved
 - fresh evidence supports the result
 - the correct terminal outcome is explicit

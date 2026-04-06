@@ -7,10 +7,12 @@ scope:
   - v0 kernel
   - execution flow
   - bootstrap
-  - adapters
+  - codex
+  - execution
 covers:
   - docs/specs/everything-automate-loop-kernel-draft.md
   - docs/specs/everything-automate-operating-principles.md
+  - docs/specs/everything-automate-planning-workflow.md
 ---
 
 # Everything Automate 구현 마일스톤
@@ -30,10 +32,9 @@ covers:
 v0 kernel contracts
   -> execution flow
   -> minimal bootstrap/intake
-  -> Codex in-session workflow
-  -> Codex runtime and recovery
-  -> Claude adaptation
-  -> wider adapters
+  -> Codex workflow surfaces
+  -> Codex execute hardening
+  -> optional Codex runtime refinement
   -> later expansion
 ```
 
@@ -44,6 +45,33 @@ v0 kernel contracts
 - 각 단계는 다음 단계로 넘어가기 전에 검증 가능해야 한다.
 
 ## 마일스톤
+
+## 현재 상태
+
+현재 구현 기준으로 보면:
+
+```text
+M0 완료
+M1 완료
+M2 완료
+M3 완료
+M4 대부분 완료
+M5 현재 진행 단계
+M6+ 보류
+```
+
+현재 active scope는 Codex 기준이다.
+
+- `brainstorming -> planning -> execute` surface는 이미 잡혔다.
+- global Codex setup installer v0도 이미 구현됐다.
+- 다음 실제 작업은 `execute` 안의 verify / decide / retry / state 연동을 하드닝하는 것이다.
+
+현재 이 저장소에서 **하지 않는 것**:
+
+- Claude adaptation 본격 구현
+- internal service adapter 본격 구현
+
+이 둘은 나중 단계나 다른 작업 흐름으로 미룬다.
 
 ### M0. 범위 고정과 기준선 정리
 
@@ -112,13 +140,13 @@ v0 kernel contracts
 - 런타임이 어떤 계약을 사용할지 최소한으로 결정할 수 있다.
 - 로컬 개발용 규칙과 배포용 진입 파일이 서로 역할을 침범하지 않는다.
 
-### M4. Codex 인세션 workflow와 handoff
+### M4. Codex workflow surfaces와 handoff
 
 목적: Codex 사용자가 세션 안에서 밟는 canonical workflow를 먼저 고정한다.
 
 이 단계에서 구현할 것:
 
-- `$deep-interview`, `$ralplan`, `$ralph`, `$cancel` 같은 primary surface 정의
+- `$brainstorming`, `$planning`, `$execute` 같은 primary surface 정의
 - planning에서 execution으로 넘어가는 handoff contract
 - plan artifact에서 execution intent를 읽는 방식
 - 인세션 workflow와 shared kernel의 연결 규칙
@@ -127,51 +155,54 @@ v0 kernel contracts
 
 - Codex의 1차 사용자 경험이 인세션 workflow로 설명된다.
 - approved plan이 execution handoff로 자연스럽게 이어진다.
-- `$ralph`와 `$cancel`이 어떤 의미를 가지는지 contract로 분명하다.
+- `brainstorming`, `planning`, `execute`의 역할 경계가 분명하다.
 - 바깥 runtime은 메인 UX가 아니라 내부 구현 레이어로 위치가 정리된다.
 
-### M5. Codex runtime과 recovery path
+### M5. Codex execute hardening
 
-목적: `M4`에서 정한 인세션 workflow를 실제 state/runtime으로 받쳐준다.
-
-이 단계에서 다룰 것:
-
-- internal launcher/runtime glue
-- handoff artifact 소비 방식
-- session-scoped instructions 준비
-- `runtime/ea_state.py`와 Codex runtime 연결
-- Codex 기준 status / cancel / resume recovery
-
-완료 조건:
-
-- 인세션 workflow가 internal runtime과 연결된다.
-- `cancelled`와 `failed`가 Codex path에서도 분리된다.
-- resume / cancel이 file-based state 계약과 충돌하지 않는다.
-- runtime primitive가 UX 레이어를 대체하지 않는다.
-
-### M6. Claude adaptation
-
-목적: Codex에서 먼저 굳힌 shared semantics를 Claude richer surface에 맞게 연결한다.
+목적: `M4`에서 정한 `execute` surface가 실제로 verify / decide / retry / state 연동까지 버티는지 검증하고 부족한 계약을 보완한다.
 
 이 단계에서 다룰 것:
 
-- Claude hook / subagent surface 재검토
-- task metadata 전달 방식 확정
-- Claude template와 shared runtime state 연결
-- Codex와 다른 Claude lifecycle advantage를 별도 표면으로 격리
+- `execute`가 planning handoff를 충분히 읽는지 검증
+- readiness check가 실제로 충분한지 검증
+- `execute -> verify -> decide -> fix -> repeat` 루프가 실제 skill contract로 충분한지 검증
+- retry / escalation / scope drift / blocker handling 하드닝
+- `complete`, `cancelled`, `failed`, `suspended/interrupted`가 안 섞이도록 terminal semantics 하드닝
+- AC progress / partial-progress / terminal summary contract 검증
+- `runtime/ea_state.py`와의 연결 필요성 및 gap 확인
+- global installer로 깐 Codex skill이 실제 사용 가능한지 확인
 
 완료 조건:
 
-- Claude path가 shared kernel 의미를 유지한 채 richer surface를 사용한다.
-- Claude 전용 편의 기능이 core state 계약을 바꾸지 않는다.
-- pause된 Claude 탐색이 실제 adapter 설계로 연결된다.
+- `execute`가 planning handoff를 기준으로 자연스럽게 시작할 수 있다.
+- `verify`와 `decide`가 `execute` 내부 루프 안에서 충분히 설명되고 검증된다.
+- progress / retry / blocker / terminal semantics가 모호하지 않다.
+- 필요한 state/runtime support gap이 식별되고, 다음 단계의 입력으로 정리된다.
 
-### M7. wider adapters
+### M6. optional Codex runtime refinement
 
-목적: Claude와 Codex 이후 다른 provider를 붙인다.
+목적: `M5`에서 드러난 gap이 있으면 Codex runtime/state/refinement를 추가로 다듬는다.
+
+이 단계에서 다룰 것:
+
+- `runtime/ea_state.py` 연동 강화
+- status / cancel / resume 표면 보강
+- installer / manifest / doctor refinement
+- handoff artifact 소비 경로 보강
+
+완료 조건:
+
+- Codex runtime support가 `execute` UX를 해치지 않으면서도 recovery를 충분히 보조한다.
+- runtime helper가 실제로 필요한 만큼만 존재한다.
+
+### M7. out-of-scope adapters
+
+목적: 다른 provider adaptation은 현재 저장소의 active 구현 범위 밖으로 둔다.
 
 이 단계에서 추가할 것:
 
+- Claude adaptation
 - OpenCode adapter
 - internal runtime adapter
 - provider별 bootstrap 차이
@@ -179,9 +210,8 @@ v0 kernel contracts
 
 완료 조건:
 
-- 새 provider가 붙어도 shared kernel 의미는 유지된다.
-- provider 차이는 adapter 경계 바깥에 머문다.
-- Codex와 Claude에서 정한 공통 상태 계약이 재사용된다.
+- 이 단계는 현재 active scope가 아니다.
+- 필요 시 별도 작업 흐름이나 후속 저장소/브랜치에서 진행한다.
 
 ### M8. later expansion
 
@@ -206,10 +236,10 @@ v0 kernel contracts
 M1 계약 고정
   -> M2 실행 흐름
   -> M3 최소 bootstrap/intake
-  -> M4 Codex 인세션 workflow와 handoff
-  -> M5 Codex runtime과 recovery path
-  -> M6 Claude adaptation
-  -> M7 wider adapters
+  -> M4 Codex workflow surfaces와 handoff
+  -> M5 Codex execute hardening
+  -> M6 optional Codex runtime refinement
+  -> M7 out-of-scope adapters
   -> M8 later expansion
 ```
 
@@ -225,13 +255,13 @@ M1 계약 고정
 - `M3`
   최소 진입점, 작업 분류 규칙, 실행 의도 기록, 템플릿 진입 규칙
 - `M4`
-  Codex in-session workflow, handoff contract, execution intent 규칙
+  Codex workflow surfaces, handoff contract, execution intent 규칙
 - `M5`
-  Codex internal runtime glue, recovery path, state 연결
+  execute hardening checklist, verify/decide/retry/state gap 검증
 - `M6`
-  Claude hook/subagent adaptation, task metadata path, template 연결
+  optional Codex runtime refinement, installer/doctor/state 보강
 - `M7`
-  OpenCode/internal adapters, provider bootstrap overlay
+  out-of-scope provider adapters
 - `M8`
   확장 기능 선택지와 활성화 조건
 
@@ -244,8 +274,8 @@ M1 계약 고정
 1. 상태 계약을 고정한다.
 2. 실행 흐름을 연결한다.
 3. 최소 진입점을 만든다.
-4. Codex 인세션 workflow를 먼저 굳힌다.
-5. 그 workflow를 받쳐주는 runtime과 recovery를 붙인다.
-6. 그 다음 Claude adaptation을 붙인다.
-7. 이후 다른 provider adapter를 붙인다.
+4. Codex workflow surfaces를 먼저 굳힌다.
+5. `execute`를 실제로 하드닝한다.
+6. 필요할 때만 Codex runtime/support를 추가 보강한다.
+7. 다른 provider adaptation은 현재 범위 밖으로 둔다.
 8. 마지막에 확장을 넓힌다.
