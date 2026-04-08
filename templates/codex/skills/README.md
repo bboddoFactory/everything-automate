@@ -14,4 +14,9 @@ Current active in-session workflow surface:
 `execute/` is downstream TC-first execution after an approved planning handoff and before `$qa`.
 `qa/` is the final cold-review gate before commit.
 
+Installed helper scripts live under the skill that uses them.
+
+- `execute/scripts/`
+- `qa/scripts/`
+
 Other workflow skills should not be added here until their contracts are explicitly agreed.

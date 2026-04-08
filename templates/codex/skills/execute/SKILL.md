@@ -124,6 +124,10 @@ approved plan
 
 The first real action is to turn the approved plan into a live working checklist.
 
+Use the installed helper in this skill:
+
+- `scripts/checklist.py execute-start`
+
 Example shape:
 
 ```text
@@ -143,11 +147,19 @@ Work one AC at a time.
 
 Do not try to finish the whole task at once.
 
+When an AC becomes active, update the checklist with:
+
+- `scripts/checklist.py ac-start`
+
 ### 3. Pick The Next TC
 
 Inside the current AC, pick the next unfinished TC.
 
 This is the heart of the loop.
+
+When a TC becomes active, update the checklist with:
+
+- `scripts/checklist.py tc-start`
 
 ### 4. Choose TC Type
 
@@ -211,6 +223,10 @@ After rerunning the current TC, decide:
 - `scope_drift`
   - stop and return to `$planning` if the work crosses the plan boundary
 
+Record the result with:
+
+- `scripts/checklist.py tc-result`
+
 ## Retry Rules
 
 Retry is bounded.
@@ -222,6 +238,10 @@ Per TC:
 - if the plan itself is too weak, return to `$planning`
 
 Do not loop forever.
+
+When an AC is complete, update the checklist with:
+
+- `scripts/checklist.py ac-complete`
 
 ## Checklist Progress
 
@@ -237,6 +257,14 @@ At minimum, keep track of:
 - latest evidence or latest check result
 
 This is what makes resume and restart understandable.
+
+## Installed Helper
+
+This skill ships its own helper script:
+
+- `scripts/checklist.py`
+
+Do not depend on a repo-only runtime helper for live checklist updates.
 
 ## End Of Execute
 

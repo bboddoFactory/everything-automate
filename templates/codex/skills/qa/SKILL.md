@@ -96,6 +96,12 @@ Prepare a focused packet with:
 
 This packet is the review input.
 
+Use the installed helper in this skill:
+
+- `scripts/build_handoff.py`
+
+Build the packet before spawning the cold reviewer.
+
 ## Cold Reviewer Rule
 
 `qa` should use one cold reviewer subagent.
@@ -144,6 +150,14 @@ QA should return:
 - Do not block commit for tiny style preferences.
 - Do not treat QA like a second execution loop.
 - Use simple English.
+
+## Installed Helper
+
+This skill ships its own helper script:
+
+- `scripts/build_handoff.py`
+
+Do not depend on a repo-only runtime helper for the review packet.
 
 ## Completion
 
