@@ -10,6 +10,6 @@ Current active in-session workflow surface:
 
 `brainstorming/` is upstream ideation and design shaping.
 `planning/` is downstream execution planning.
-`execute/` is downstream C-lite execution after an approved planning handoff.
+`execute/` is downstream TC-first execution after an approved planning handoff and before `$qa`.
 
 Other workflow skills should not be added here until their contracts are explicitly agreed.

@@ -71,5 +71,5 @@ Current note:
 
 - `$brainstorming` is the idea-shaping surface before planning.
 - `$planning` is the execution-planning surface after direction is clear enough.
-- `$execute` is the C-lite execution surface after an approved planning handoff.
-- Ralph execution concepts still inform the contract, but are not installed as separate user-facing skills.
+- `$execute` is the TC-first execution surface after an approved planning handoff and before `$qa`.
+- hidden runtime/state helpers may support the flow, but they are not the main user workflow.
