@@ -19,6 +19,8 @@ Its job is to:
 - lock scope and non-goals
 - lock the design direction at the right level
 - choose a test strategy
+- read relevant accepted decisions when a settled boundary already exists
+- create or update a decision note when a meaningful choice becomes accepted during planning
 - write a plan that `$execute` can follow without guessing
 
 `planning` is not:
@@ -81,12 +83,15 @@ Do not keep asking for confirmation in the middle once the plan is clear enough 
 ```text
 input
   -> quick context check
+  -> read relevant accepted decisions if needed
   -> explore repo if needed
   -> clarify if still unclear
   -> lock task goal
   -> lock scope / non-goals
   -> lock design direction
   -> choose test strategy
+  -> if a meaningful choice becomes settled
+     -> create or update decision note
   -> write Task
      -> write ACs
         -> attach TCs
@@ -111,7 +116,19 @@ Start by restating:
 
 Keep this short.
 
-### 2. Explore Repo If Needed
+### 2. Read Relevant Accepted Decisions
+
+Before writing a new plan, check whether a settled boundary already exists in:
+
+- `.everything-automate/decisions/`
+
+Read only the decision notes that matter to the current task.
+
+Use accepted decisions to avoid reopening already-settled choices.
+
+Do not read the full decision log when only one or two notes matter.
+
+### 3. Explore Repo If Needed
 
 Use `explorer` only when repo facts matter.
 
@@ -124,19 +141,19 @@ Use it to find:
 
 Do not ask the user for repo facts that the repo can tell you.
 
-### 3. Clarify If Still Unclear
+### 4. Clarify If Still Unclear
 
-Ask the user only if important ambiguity remains after the context check and any needed exploration.
+Ask the user only if important ambiguity remains after the context check, any needed decision-note reads, and any needed exploration.
 
 Ask one strong question at a time.
 
-### 4. Lock Task Goal
+### 5. Lock Task Goal
 
 Write down what this task should change when it is done.
 
 This is the "what becomes true after the work" section.
 
-### 5. Lock Scope And Non-Goals
+### 6. Lock Scope And Non-Goals
 
 Make clear:
 
@@ -144,7 +161,7 @@ Make clear:
 - what is out of scope now
 - what boundaries `execute` should not cross silently
 
-### 6. Lock Design Direction
+### 7. Lock Design Direction
 
 Stay at the right level.
 
@@ -157,7 +174,7 @@ Planning should describe:
 
 Planning should **not** turn into long code examples or detailed implementation drafts.
 
-### 7. Choose Test Strategy
+### 8. Choose Test Strategy
 
 Every real execution plan needs a test strategy.
 
@@ -172,7 +189,25 @@ Choose the best fit for the task:
 
 The chosen test strategy should make sense for the kind of project and change.
 
-### 8. Write `Task -> AC -> TC`
+### 9. Create Or Update Decision Notes When Needed
+
+`planning` is the main stage that writes decision notes.
+
+Write or update a decision note when:
+
+- a meaningful design or workflow choice becomes accepted
+- future sessions would likely need to remember this choice
+- the choice is broader than one small implementation detail
+
+Do **not** write a decision note for:
+
+- still-open brainstorming choices
+- tiny implementation details
+- information that only matters inside one short-lived plan
+
+If an accepted decision is changed later, update or supersede the old decision note instead of silently drifting.
+
+### 10. Write `Task -> AC -> TC`
 
 This is the backbone of the plan.
 
@@ -200,7 +235,7 @@ Meaning:
 Keep ACs concrete.
 Keep TCs tied to their ACs.
 
-### 9. Use `plan-arch` If Needed
+### 11. Use `plan-arch` If Needed
 
 Use `plan-arch` when:
 
@@ -211,7 +246,7 @@ Use `plan-arch` when:
 
 `plan-arch` is not required for every plan.
 
-### 10. Use `plan-devil` If Needed
+### 12. Use `plan-devil` If Needed
 
 Use `plan-devil` when:
 
@@ -223,7 +258,7 @@ Use `plan-devil` when:
 
 `plan-devil` is also not required for every plan.
 
-### 11. Write Execute Handoff
+### 13. Write Execute Handoff
 
 End the plan with a simple block that `$execute` can read.
 
@@ -242,6 +277,8 @@ Every plan should contain:
 - open risks
 - execute handoff
 
+If planning settled a meaningful long-lived choice, update or create the related decision note before finishing.
+
 ## Plan Artifact Path
 
 During local Everything Automate development, write plan artifacts to:
@@ -249,6 +286,14 @@ During local Everything Automate development, write plan artifacts to:
 - `.everything-automate/plans/{YYYY-MM-DD}-{slug}.md`
 
 If a caller already provides a plan path, use that path.
+
+## Decision Artifact Path
+
+During local Everything Automate development, write decision notes to:
+
+- `.everything-automate/decisions/{decision-id}-{slug}.md`
+
+Use short stable ids such as `DEC-001`.
 
 ## Execute Handoff
 
@@ -292,6 +337,7 @@ Execute Handoff
 - Do not leave test strategy implicit.
 - Do not leave ACs without TCs.
 - Do not hand off to `$execute` if the plan still forces guessing.
+- Do not create decision notes for every tiny choice.
 - Use simple English.
 - Put the main planning conclusion first when reporting the result.
 - Keep plan explanations clean and easy to scan.
@@ -308,4 +354,6 @@ Execute Handoff
 - test strategy is explicit
 - `Task -> AC -> TC` is present and usable
 - the execute handoff is present
+- relevant accepted decisions were read when they mattered
+- any new meaningful accepted choice was written to a decision note when needed
 - the user approves the plan when approval is needed
