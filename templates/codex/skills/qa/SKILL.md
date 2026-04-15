@@ -1,6 +1,6 @@
 ---
 name: qa
-description: Review finished work with fresh eyes before commit by using a cold reviewer subagent.
+description: Review finished work before commit by routing into the right cold reviewer lane and then making one final QA judgment.
 argument-hint: "[plan path, execute result, or ready-for-review task]"
 ---
 
@@ -18,7 +18,8 @@ It may also be run again explicitly when a rerun is needed.
 Its job is to:
 
 - review finished work with fresh eyes
-- catch important code, test, behavior, and contract problems
+- route the work into the right reviewer lane
+- catch important problems without making the reviewer guess its job
 - decide whether the work is ready for commit
 - send the work back for fixes when needed
 
@@ -64,7 +65,11 @@ If that is the case, go back to `$execute`.
 execute result
   -> QA entry check
   -> prepare QA handoff packet
-  -> spawn cold qa-reviewer
+  -> main LLM routes reviewer lane
+     -> code reviewer
+     -> harness reviewer
+     -> both for mixed work
+     -> ask user if still unclear
   -> collect findings
   -> main LLM judges findings
   -> decide
@@ -109,41 +114,92 @@ Use the installed helper in this skill:
 
 - `scripts/build_handoff.py`
 
-Build the packet before spawning the cold reviewer.
+Build the packet before spawning the reviewer lane.
 
 The helper should fail if the packet is missing the basics needed for a real review.
 
+## Reviewer Routing
+
+`qa` stays one stage, but it should route into the right cold reviewer lane.
+
+The main LLM owns that routing.
+
+### Available Reviewer Lanes
+
+- `code-reviewer`
+- `harness-reviewer`
+
+### Route To `code-reviewer` When
+
+Use `code-reviewer` when the change is mainly about general code work such as:
+
+- source code behavior
+- structure and boundaries
+- failure-path safety
+- test quality
+- maintainability
+
+### Route To `harness-reviewer` When
+
+Use `harness-reviewer` when the change is mainly about harness-facing work such as:
+
+- skills
+- agent prompts
+- workflow contract text
+- handoff shape
+- runtime/helper boundaries
+- LLM-vs-script ownership
+
+### Route To Both When
+
+Use both reviewers when the change clearly mixes both surfaces.
+
+Examples:
+
+- a code change that also changes skill or contract behavior
+- a helper or runtime change that also changes normal implementation behavior
+- a task where both code defects and harness defects are plausible first-order risks
+
+### Ask The User When Routing Is Still Unclear
+
+Do not guess when the right reviewer lane is still unclear after reading the changed files, diff, plan summary, and task intent.
+
+Ask the user which review focus matters more, or whether both reviews are wanted.
+
 ## Cold Reviewer Rule
 
-`qa` should use one cold reviewer subagent.
+Any reviewer lane used by `qa` should be cold.
 
 "Cold" means:
 
 - not the implementer
 - not heavily biased by the full working conversation
-- given only the focused review packet
+- given only the focused review packet plus the routing context it needs
 
 ## Reviewer Focus
 
-The reviewer should check two lenses:
+`code-reviewer` should focus on code-lens concerns such as:
 
-- code lens
-  - code quality
-  - architecture fit
-  - security or risk smells
-  - test quality
-- behavior and contract lens
-  - mismatch with the intended goal
-  - whether the LLM will see the right inputs
-  - whether judgment ownership stays with the LLM where it should
-  - whether scripts only validate and persist state instead of deciding behavior
+- scope and cohesion
+- structure and boundaries
+- failure-path safety
+- test fit
+- maintainability
+
+`harness-reviewer` should focus on harness concerns such as:
+
+- workflow contract fit
+- skill and prompt behavior
+- handoff and input completeness
+- LLM-vs-script ownership boundaries
+- runtime/helper boundary safety
 
 Focus on important problems.
 Do not nitpick style.
 
 ## QA Judgment
 
-The cold reviewer finds problems.
+The reviewer lane finds problems.
 
 The main LLM running `qa` must still judge those findings.
 
@@ -151,10 +207,8 @@ That means:
 
 - decide which findings are true blockers
 - separate real defects from weaker concerns
-- judge code defects
-- judge behavior-shaping defects
-- judge contract and ownership defects
-- decide whether the work should:
+- merge findings from one or both reviewer lanes
+- judge whether the work should:
   - `pass`
   - `fix`
   - rarely return to `$planning`
@@ -176,6 +230,7 @@ Only recommend going back to `$planning` if the problem is truly at the plan lev
 QA should return:
 
 - verdict
+- reviewer lane used
 - important findings
 - open risks
 - recommended next step
@@ -186,6 +241,7 @@ QA should return:
 - Do not reopen planning casually.
 - Do not block commit for tiny style preferences.
 - Do not treat QA like a second execution loop.
+- Do not guess the reviewer lane when the change is still ambiguous.
 - After a normal successful `$execute`, continue into `$qa` in the same LLM-led workflow when the review inputs are ready.
 - Do not describe this as a runtime-enforced script transition in this version.
 - Use simple English.
@@ -206,6 +262,7 @@ Do not depend on a repo-only runtime helper for the review packet.
 `qa` is complete when:
 
 - the review verdict is clear
+- the reviewer lane choice is clear
 - the important findings are clear
 - the next step is clear
 - the work is either ready for commit or clearly sent back for fixes

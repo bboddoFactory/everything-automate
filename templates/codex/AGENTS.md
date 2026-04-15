@@ -141,8 +141,9 @@ Planning agents:
 - `plan-arch`
 - `plan-devil`
 
-QA review agent:
-- `qa-reviewer`
+QA review agents:
+- `code-reviewer`
+- `harness-reviewer`
 
 Current note:
 

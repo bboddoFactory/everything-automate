@@ -7,7 +7,13 @@ __pycache__/
 .codex/skills/
 .codex/agents/
 .codex/testing/
-.everything-automate/
+
+# Local Everything Automate artifacts
+.everything-automate/*
+!.everything-automate/decisions/
+!.everything-automate/decisions/*.md
+!.everything-automate/plans/
+!.everything-automate/plans/*.md
 
 # Cloned external references are working material, not source-of-truth
 references/

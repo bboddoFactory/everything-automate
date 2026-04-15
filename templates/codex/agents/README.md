@@ -8,7 +8,12 @@ Current planning roster:
 - `plan-arch.md`
 - `plan-devil.md`
 
-Current QA review agent:
+Current QA review agents:
+
+- `code-reviewer.md`
+- `harness-reviewer.md`
+
+Legacy QA reviewer prompt:
 
 - `qa-reviewer.md`
 

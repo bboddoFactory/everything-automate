@@ -100,6 +100,7 @@ input
   -> use plan-devil if needed
   -> revise if needed
   -> write execute handoff
+  -> report plan and handoff summary
   -> user approval
 ```
 
@@ -262,6 +263,23 @@ Use `plan-devil` when:
 
 End the plan with a simple block that `$execute` can read.
 
+### 14. Report Plan Before Approval
+
+Before asking for approval, give the user a short clean report of the plan.
+
+That report should confirm:
+
+- the main planning conclusion
+- the main scope and non-goals
+- the design direction
+- the test strategy
+- the execute handoff
+- the open risks
+
+Do not paste the full plan back when a shorter report is enough.
+
+The goal is to let the user confirm the handoff shape before execution starts.
+
 ## Required Plan Output
 
 Every plan should contain:
@@ -310,6 +328,19 @@ Every approved plan must end with:
 
 Default `execution_unit` is `AC`.
 
+## User Report Before Approval
+
+Before approval, summarize the plan in a way that is easier to scan than the full plan file.
+
+That summary should include:
+
+- what the work will change
+- what is in scope now
+- what stays out of scope now
+- the test strategy
+- the execute handoff fields
+- the main open risks
+
 ## Output Shape
 
 Use a structure like this:
@@ -337,6 +368,8 @@ Execute Handoff
 - Do not leave test strategy implicit.
 - Do not leave ACs without TCs.
 - Do not hand off to `$execute` if the plan still forces guessing.
+- Do not skip the short user-facing plan report before asking for approval.
+- Do not paste the full plan file back when a clean summary is enough.
 - Do not create decision notes for every tiny choice.
 - Use simple English.
 - Put the main planning conclusion first when reporting the result.
@@ -354,6 +387,7 @@ Execute Handoff
 - test strategy is explicit
 - `Task -> AC -> TC` is present and usable
 - the execute handoff is present
+- the user has seen a clean plan summary before approval
 - relevant accepted decisions were read when they mattered
 - any new meaningful accepted choice was written to a decision note when needed
 - the user approves the plan when approval is needed
