@@ -152,4 +152,5 @@ Current note:
 - `$execute` is the TC-first execution surface after an approved planning handoff and before `$qa`.
 - `$execute` normally continues into `$qa` before `commit` when the work is ready for review.
 - `$qa` is the final review-and-judgment gate before `commit`.
+- support skills such as `issue-capture` and `issue-pick` may feed backlog work into `$brainstorming`, but they are not main workflow stages.
 - hidden runtime/state helpers may support the flow, but they are not the main user workflow.

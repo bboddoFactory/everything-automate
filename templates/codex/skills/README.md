@@ -14,6 +14,14 @@ Current active in-session workflow surface:
 `execute/` is downstream TC-first execution after an approved planning handoff and before `$qa`.
 `qa/` is the final cold-review gate before commit.
 
+Support skills:
+
+- `issue-capture/`
+- `issue-pick/`
+
+`issue-capture/` creates a real backlog GitHub issue in `yhyuntak/everything-automate` from another project session.
+`issue-pick/` reads one open backlog issue and turns it into input for `$brainstorming`.
+
 Installed helper scripts live under the skill that uses them.
 
 - `execute/scripts/`
