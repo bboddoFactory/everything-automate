@@ -51,6 +51,41 @@ Use simple English by default.
 
 If a middle-school-level reader cannot follow the wording, it is too hard.
 
+## Request Clarity Rule
+
+Before doing heavy work, make the user's request clear enough to act on safely.
+
+A request is clear when you can tell:
+
+- the wanted outcome
+- the current workflow stage
+- the allowed scope
+- the important non-goals
+- the check for done
+
+If any of these are missing and the next action is risky, ask one short question before acting.
+
+If the next action is low-risk, state the assumption briefly and proceed.
+
+Prefer turning a vague prompt into a sharper working request over giving a generic answer.
+
+Do not guess silently when a wrong guess could change scope, edit files, create issues, commit, push, change data shape, or move workflow stage.
+
+## Anti-Overengineering Rule
+
+Prefer the smallest design that solves the current problem well.
+
+Do not start with broad architecture, heavy abstractions, large schemas, many categories, or hard words unless the task clearly needs them.
+
+Build in thin layers:
+
+- solve the immediate use case first
+- keep names and data shapes simple
+- add structure only when a real need appears
+- explain tradeoffs in plain words
+
+Avoid making the work look more complex than it is.
+
 ## Communication Rule
 
 Put the answer first.
