@@ -1,55 +1,55 @@
 ---
-name: execute
-description: Use an approved plan to finish the work through a TC-first loop, then hand off to `$qa`.
+name: ea-execute
+description: Use an approved plan to finish the work through a TC-first loop, then hand off to `$ea-qa`.
 argument-hint: "[plan path or approved task]"
 ---
 
-# execute
+# ea-execute
 
-Use an approved plan to finish the work without reopening planning.
+Use an approved plan to finish the work without reopening ea-planning.
 
 ## Purpose
 
-`execute` is the main work phase after `$planning`.
+`ea-execute` is the main work phase after `$ea-planning`.
 
-Calling `$execute` is an explicit request to use the `worker` subagent for implementation work.
+Calling `$ea-execute` is an explicit request to use the `ea-worker` subagent for implementation work.
 
 The main LLM is the controller.
 The controller owns the loop, but it should not do normal implementation itself.
-The controller should spawn the `worker` for each AC/TC implementation unit after the entry check and checklist setup.
+The controller should spawn the `ea-worker` for each AC/TC implementation unit after the entry check and checklist setup.
 
-Only skip the worker for controller bookkeeping, such as checklist updates, QA handoff files, or a clearly read-only verification step.
+Only skip the ea-worker for controller bookkeeping, such as checklist updates, QA handoff files, or a clearly read-only verification step.
 
 Its job is to:
 
 - read an approved plan
 - turn `Task -> AC -> TC` into a working checklist
 - keep the main LLM as the controller for the loop
-- route implementation work to the `worker` subagent lane by default
-- route hard execution decisions to the `advisor` subagent lane when needed
-- let the worker raise escalation signals without calling the advisor directly
+- route implementation work to the `ea-worker` subagent lane by default
+- route hard execution decisions to the `ea-advisor` subagent lane when needed
+- let the ea-worker raise escalation signals without calling the ea-advisor directly
 - move through the task one AC at a time
 - use TC-first work when possible
 - use the earliest valid check first when strict test-first is not possible
 - keep progress visible
-- finish execution and continue into `$qa` when review inputs are ready
+- finish execution and continue into `$ea-qa` when review inputs are ready
 
 ## Position In The Main Flow
 
 ```text
-$brainstorming
-  -> $planning
-  -> $execute
-  -> $qa
+$ea-brainstorming
+  -> $ea-planning
+  -> $ea-execute
+  -> $ea-qa
   -> commit
 ```
 
-`execute` is not the final acceptance step.
-That is what `$qa` is for.
+`ea-execute` is not the final acceptance step.
+That is what `$ea-qa` is for.
 
 ## Use When
 
-Use `execute` when:
+Use `ea-execute` when:
 
 - an approved plan already exists
 - the plan contains `Task -> AC -> TC`
@@ -58,19 +58,19 @@ Use `execute` when:
 
 ## Do Not Use When
 
-Do **not** use `execute` when:
+Do **not** use `ea-execute` when:
 
 - the direction is still fuzzy
 - the plan is still draft
 - scope and non-goals are still unclear
 - the plan still forces guessing
-- the user still needs brainstorming or planning
+- the user still needs ea-brainstorming or ea-planning
 
-If any of the above are true, stop and go back to `$planning`.
+If any of the above are true, stop and go back to `$ea-planning`.
 
 ## Input Contract
 
-`execute` reads an approved plan.
+`ea-execute` reads an approved plan.
 
 At minimum, it needs:
 
@@ -102,7 +102,7 @@ If the entry check fails:
 
 - do not start implementation
 - explain what is missing
-- return to `$planning`
+- return to `$ea-planning`
 
 ## Core Flow
 
@@ -162,7 +162,7 @@ If the entry check fails:
    v
 [QA Entry Gate]
    |
-   +---- ready ---------------> [$qa]
+   +---- ready ---------------> [$ea-qa]
    |
    +---- missing input -------> [Stay In Execute]
 ```
@@ -175,7 +175,7 @@ The first real action is to turn the approved plan into a live working checklist
 
 Use the installed helper in this skill:
 
-- `scripts/checklist.py execute-start`
+- `scripts/checklist.py ea-execute-start`
 
 Example shape:
 
@@ -230,18 +230,18 @@ Detailed routing, such as UI browser checks or prompt scenarios, should come fro
 
 ## Controller, Worker, Advisor
 
-`execute` uses one owner for the loop.
+`ea-execute` uses one owner for the loop.
 
-That owner is the main LLM running `$execute`.
+That owner is the main LLM running `$ea-execute`.
 Treat that main LLM as the `controller`.
 
 The supporting lanes are real subagent lanes:
 
-- `worker`
+- `ea-worker`
   - default implementation lane
   - works on the active AC and TC
   - reports pass, fail, blocked, or escalation_needed
-- `advisor`
+- `ea-advisor`
   - high-reasoning decision lane
   - receives a focused handoff from the controller
   - recommends a path but does not implement
@@ -251,41 +251,41 @@ The roles are:
 - `controller`
   - read the plan
   - pick AC and TC
-  - build the worker task
-  - delegate implementation work to a worker by default
-  - read worker reports and escalation signals
-  - decide whether advisor help is needed
-  - decide whether to retry, stop, or return to `$planning`
-- `worker`
+  - build the ea-worker task
+  - delegate implementation work to a ea-worker by default
+  - read ea-worker reports and escalation signals
+  - decide whether ea-advisor help is needed
+  - decide whether to retry, stop, or return to `$ea-planning`
+- `ea-worker`
   - read the code for the active AC and TC
   - make bounded changes
   - run checks
   - report what happened clearly
   - raise escalation signals when continuing would be unsafe or speculative
-- `advisor`
+- `ea-advisor`
   - diagnose a hard execution moment
   - compare options
   - recommend a path and next steps
 
 Important rules:
 
-- the worker does **not** call the advisor directly
-- the worker may ask the controller to escalate
-- the controller owns advisor use
+- the ea-worker does **not** call the ea-advisor directly
+- the ea-worker may ask the controller to escalate
+- the controller owns ea-advisor use
 - the controller owns the final execution decision
-- the controller should not implement directly during normal `$execute`
+- the controller should not implement directly during normal `$ea-execute`
 - direct controller edits are only for tiny harness bookkeeping, such as checklist or handoff files
 
 ## Worker Escalation Rule
 
-The worker should continue when:
+The ea-worker should continue when:
 
 - the next fix is clear
 - the fix stays inside approved scope
 - the check result points to a concrete next step
 - the risk of continuing is low
 
-The worker should raise escalation when:
+The ea-worker should raise escalation when:
 
 - the same check fails again and the next move is not clear
 - the root cause is unclear after a reasonable attempt
@@ -295,14 +295,14 @@ The worker should raise escalation when:
 - continuing would be guessing
 - the risk of a wrong fix is high
 
-Escalation does not automatically mean advisor.
+Escalation does not automatically mean ea-advisor.
 The controller decides one of these:
 
 - retry directly with a clearer instruction
-- adjust the worker task boundary
-- call the advisor
+- adjust the ea-worker task boundary
+- call the ea-advisor
 - stop as blocked
-- return to `$planning`
+- return to `$ea-planning`
 
 Use these `escalation_type` values:
 
@@ -348,24 +348,24 @@ but always anchor the work in a TC
 
 ## If The TC Is Weak Or Unclear
 
-Do not silently redesign the TC inside `$execute`.
+Do not silently redesign the TC inside `$ea-execute`.
 
-Return to `$planning` when a TC is:
+Return to `$ea-planning` when a TC is:
 
 - unclear
 - too weak to prove the AC is done
 - mismatched with its AC
-- not executable by the controller or worker
+- not executable by the controller or ea-worker
 - only checking internal calls without a result that matters
 
 Example:
 
 ```text
 TC: "check it works"
-  -> return to $planning
+  -> return to $ea-planning
 
 TC: "verify private helper X was called once"
-  -> return to $planning unless that call is the public contract
+  -> return to $ea-planning unless that call is the public contract
 ```
 
 ## Decision Loop
@@ -377,12 +377,12 @@ After rerunning the current TC, decide:
   - if all TCs in the AC pass, mark the AC done
 - `fail`
   - retry directly if the next move is still clear
-  - use the advisor if the execution path is no longer clear
+  - use the ea-advisor if the execution path is no longer clear
 - `blocked`
   - stop and report the blocker clearly
-  - return to `$planning` if the TC itself is unclear, too weak, mismatched, or not executable
+  - return to `$ea-planning` if the TC itself is unclear, too weak, mismatched, or not executable
 - `scope_drift`
-  - stop and return to `$planning` if the work crosses the plan boundary
+  - stop and return to `$ea-planning` if the work crosses the plan boundary
 
 Record the result with:
 
@@ -390,16 +390,16 @@ Record the result with:
 
 ## Advisor Trigger Rules
 
-Do not call the advisor for every failure.
+Do not call the ea-advisor for every failure.
 
-Use the advisor when the controller sees one of these:
+Use the ea-advisor when the controller sees one of these:
 
 - the same TC fails again and the next move is no longer clear
 - execution reaches a real design fork
 - the likely fix crosses the approved plan boundary
-- the worker report shows repeated effort with weak progress
-- the worker raises `advisor_candidate` and the controller agrees
-- the task is near completion and needs one last risk pass before `$qa`
+- the ea-worker report shows repeated effort with weak progress
+- the ea-worker raises `advisor_candidate` and the controller agrees
+- the task is near completion and needs one last risk pass before `$ea-qa`
 
 If the next step is still obvious, retry directly first.
 
@@ -411,8 +411,8 @@ Per TC:
 
 - allow up to 3 fix-and-retry cycles
 - if the same failure keeps coming back without a meaningfully new approach, stop retrying
-- if a retry is no longer clear, switch to an advisor handoff instead of guessing
-- if the plan itself is too weak, return to `$planning`
+- if a retry is no longer clear, switch to an ea-advisor handoff instead of guessing
+- if the plan itself is too weak, return to `$ea-planning`
 
 Do not loop forever.
 
@@ -444,8 +444,8 @@ Use a hybrid rule for execution context:
 
 In v1, the important boundaries are:
 
-- durable worker report
-- advisor handoff
+- durable ea-worker report
+- ea-advisor handoff
 - controller retry packet
 - checklist progress
 
@@ -457,12 +457,12 @@ The latest durable packet files live under the task state root.
 
 The main files are:
 
-- `worker-report.json`
-- `advisor-handoff.json`
+- `ea-worker-report.json`
+- `ea-advisor-handoff.json`
 - `retry-packet.json`
-- `execute-progress.json`
+- `ea-execute-progress.json`
 
-Use `worker-report.json` for the latest durable worker boundary:
+Use `ea-worker-report.json` for the latest durable ea-worker boundary:
 
 - summary
 - what_tried
@@ -476,7 +476,7 @@ Use `worker-report.json` for the latest durable worker boundary:
 - optional uncertainty_reason
 - optional risk_if_continue
 
-Use `advisor-handoff.json` only when the controller calls the advisor:
+Use `ea-advisor-handoff.json` only when the controller calls the ea-advisor:
 
 - open_question
 - recent_attempts
@@ -488,7 +488,7 @@ Use `advisor-handoff.json` only when the controller calls the advisor:
 - optional uncertainty_reason
 - optional risk_if_continue
 
-Use `retry-packet.json` after the controller reads the advisor result and decides the next move:
+Use `retry-packet.json` after the controller reads the ea-advisor result and decides the next move:
 
 - controller_decision
 - recommended_path
@@ -503,7 +503,7 @@ When all ACs are complete, do not stop at "implementation done".
 
 Check whether QA can start now.
 
-Normal execute completion should only move forward when:
+Normal ea-execute completion should only move forward when:
 
 - changed files exist
 - test or check results exist
@@ -511,12 +511,12 @@ Normal execute completion should only move forward when:
 
 If those are true:
 
-- build the QA handoff with `qa/scripts/build_handoff.py`
-- continue into `$qa` in the same LLM-led workflow
+- build the QA handoff with `ea-qa/scripts/build_handoff.py`
+- continue into `$ea-qa` in the same LLM-led workflow
 
 If those are not true:
 
-- stay in `execute`
+- stay in `ea-execute`
 - say clearly what is still missing before QA
 
 ## Installed Helper
@@ -527,13 +527,13 @@ This skill ships its own helper script:
 
 Use it for:
 
-- `execute-start`
+- `ea-execute-start`
 - `ac-start`
 - `tc-start`
 - `tc-result`
 - `ac-complete`
-- `worker-report`
-- `advisor-handoff`
+- `ea-worker-report`
+- `ea-advisor-handoff`
 - `retry-packet`
 
 Do not depend on a repo-only runtime helper for live checklist updates.
@@ -545,22 +545,22 @@ When all ACs are complete and QA entry conditions are satisfied:
 ```text
 task complete
   -> build QA handoff
-  -> enter $qa
+  -> enter $ea-qa
 ```
 
-`execute` does not go straight to commit.
-After a normal successful execute run, the main LLM should continue into `$qa` without a separate user-side command.
+`ea-execute` does not go straight to commit.
+After a normal successful ea-execute run, the main LLM should continue into `$ea-qa` without a separate user-side command.
 This is a skill-level workflow rule in this version, not a runtime-enforced script handoff.
 
 ## Constraints
 
-- Do not brainstorm inside `execute`.
-- Do not replan inside `execute`.
+- Do not brainstorm inside `ea-execute`.
+- Do not replan inside `ea-execute`.
 - Do not treat "looks done" as done.
 - Do not silently widen scope.
 - Do not silently redesign weak TCs.
-- Do not let the worker own the whole loop.
-- Do not let the worker call the advisor directly.
+- Do not let the ea-worker own the whole loop.
+- Do not let the ea-worker call the ea-advisor directly.
 - Do not skip TC thinking just because strict TDD is hard.
 - When you report progress or completion, say the result first.
 - Keep updates clean and easy to scan.
@@ -568,10 +568,10 @@ This is a skill-level workflow rule in this version, not a runtime-enforced scri
 
 ## Completion
 
-`execute` is complete only when:
+`ea-execute` is complete only when:
 
 - the approved plan has been followed
 - all required ACs are complete
 - all required TCs are resolved
 - progress is visible enough to understand what happened
-- the next step is direct `$qa` in the same workflow or an explicit QA rerun when needed
+- the next step is direct `$ea-qa` in the same workflow or an explicit QA rerun when needed

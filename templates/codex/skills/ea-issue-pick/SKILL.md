@@ -1,16 +1,16 @@
 ---
-name: issue-pick
-description: Show open backlog issues from yhyuntak/everything-automate, let the user pick one, and turn it into a brainstorming-ready note.
+name: ea-issue-pick
+description: Show open backlog issues from yhyuntak/everything-automate, let the user pick one, and turn it into a ea-brainstorming-ready note.
 argument-hint: "[optional issue number, backlog request, or pick-one request]"
 ---
 
-# issue-pick
+# ea-issue-pick
 
 Use this in the EA repo when the user wants to start from a backlog GitHub issue instead of a fresh prompt.
 
 ## Purpose
 
-`issue-pick` is a backlog intake skill.
+`ea-issue-pick` is a backlog intake skill.
 
 Its job is to:
 
@@ -18,25 +18,25 @@ Its job is to:
 - show a short shortlist to the user
 - let the user pick one issue
 - read the chosen issue body and comments
-- turn that issue into a brainstorming-ready note
+- turn that issue into a ea-brainstorming-ready note
 
 ## Use When
 
-Use `issue-pick` when:
+Use `ea-issue-pick` when:
 
 - the user wants to work from the EA backlog
 - the user wants to choose one GitHub issue to discuss next
-- the next step should start at `$brainstorming`
+- the next step should start at `$ea-brainstorming`
 
 ## Do Not Use When
 
-Do **not** use `issue-pick` when:
+Do **not** use `ea-issue-pick` when:
 
 - the user already has a clear new request and does not need backlog intake
 - the user already approved a plan and wants implementation
 - the user wants pure GitHub triage without starting work
 
-If the user wants planning or implementation directly, use the normal workflow skill instead.
+If the user wants ea-planning or implementation directly, use the normal workflow skill instead.
 
 ## Repo And Filter Contract
 
@@ -58,7 +58,7 @@ If GitHub issue read access is not available, stop and say so clearly.
 
 ## Interaction Policy
 
-`issue-pick` is interactive.
+`ea-issue-pick` is interactive.
 
 Default rule:
 
@@ -83,7 +83,7 @@ If there are no open backlog issues, say that clearly and stop.
 
 ## Brainstorming-Ready Note
 
-After one issue is picked, reshape it into a short note that `$brainstorming` can start from.
+After one issue is picked, reshape it into a short note that `$ea-brainstorming` can start from.
 
 Use this shape:
 
@@ -111,7 +111,7 @@ One or two rough directions if they are already visible.
 
 ### Open Questions For Brainstorming
 
-What `$brainstorming` should help answer next.
+What `$ea-brainstorming` should help answer next.
 
 ## Core Flow
 
@@ -120,23 +120,23 @@ ask for backlog intake
   -> list open backlog issues
   -> user picks one
   -> read issue body and comments
-  -> reshape into brainstorming-ready note
-  -> continue with $brainstorming
+  -> reshape into ea-brainstorming-ready note
+  -> continue with $ea-brainstorming
 ```
 
 ## Stop Rule
 
-`issue-pick` stops at the start of `$brainstorming`.
+`ea-issue-pick` stops at the start of `$ea-brainstorming`.
 
 It should not:
 
-- jump straight into `$planning`
-- jump straight into `$execute`
+- jump straight into `$ea-planning`
+- jump straight into `$ea-execute`
 - pretend the issue is already solution-ready
 
 ## Rules
 
 - do not skip the shortlist unless the user already named one issue
 - do not dump the full issue thread if a short note is enough
-- do not turn issue-pick into broad GitHub backlog management
-- do not skip ahead past `$brainstorming`
+- do not turn ea-issue-pick into broad GitHub backlog management
+- do not skip ahead past `$ea-brainstorming`

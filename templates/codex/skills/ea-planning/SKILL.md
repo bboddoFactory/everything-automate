@@ -1,16 +1,16 @@
 ---
-name: planning
-description: Turn a clear direction into a file-based plan that `$execute` can follow.
+name: ea-planning
+description: Turn a clear direction into a file-based plan that `$ea-execute` can follow.
 argument-hint: "<task, approved direction, or implementation request>"
 ---
 
-# planning
+# ea-planning
 
-Use this when the direction is clear enough and the user now wants execution planning.
+Use this when the direction is clear enough and the user now wants execution ea-planning.
 
 ## Purpose
 
-`planning` is an execution-prep skill.
+`ea-planning` is an execution-prep skill.
 
 Its job is to:
 
@@ -20,12 +20,12 @@ Its job is to:
 - lock the design direction at the right level
 - choose a test strategy
 - read relevant accepted decisions when a settled boundary already exists
-- create or update a decision note when a meaningful choice becomes accepted during planning
-- write a plan that `$execute` can follow without guessing
+- create or update a decision note when a meaningful choice becomes accepted during ea-planning
+- write a plan that `$ea-execute` can follow without guessing
 
-`planning` is not:
+`ea-planning` is not:
 
-- brainstorming
+- ea-brainstorming
 - implementation
 - code writing
 - a place to dump long code examples
@@ -33,19 +33,19 @@ Its job is to:
 ## Position In The Main Flow
 
 ```text
-$brainstorming
+$ea-brainstorming
   -> direction becomes clear enough
-  -> $planning
-  -> $execute
-  -> $qa
+  -> $ea-planning
+  -> $ea-execute
+  -> $ea-qa
   -> commit
 ```
 
-If the direction is still fuzzy, stop and go back to `$brainstorming`.
+If the direction is still fuzzy, stop and go back to `$ea-brainstorming`.
 
 ## Use When
 
-Use `planning` when:
+Use `ea-planning` when:
 
 - the user wants a real execution plan
 - a file-based plan would help
@@ -55,18 +55,18 @@ Use `planning` when:
 
 ## Do Not Use When
 
-Do **not** use `planning` when:
+Do **not** use `ea-planning` when:
 
 - the user is still choosing between broad directions
 - the request is still mostly idea shaping
 - the user only wants comparison or thought cleanup
 - the user already has an approved plan and wants implementation
 
-If any of the above are true, move to `$brainstorming` or `$execute` instead.
+If any of the above are true, move to `$ea-brainstorming` or `$ea-execute` instead.
 
 ## Interaction Policy
 
-`planning` is mostly non-interactive.
+`ea-planning` is mostly non-interactive.
 
 Ask the user questions only when needed.
 
@@ -95,11 +95,11 @@ input
   -> write Task
      -> write ACs
         -> attach TCs
-  -> use plan-arch for non-trivial plans
+  -> use ea-plan-arch for non-trivial plans
   -> revise if needed
-  -> use plan-devil for non-trivial plans
+  -> use ea-plan-devil for non-trivial plans
   -> revise if needed
-  -> write execute handoff
+  -> write ea-execute handoff
   -> report plan and handoff summary
   -> user approval
 ```
@@ -131,7 +131,7 @@ Do not read the full decision log when only one or two notes matter.
 
 ### 3. Explore Repo If Needed
 
-Use `explorer` only when repo facts matter.
+Use `ea-explorer` only when repo facts matter.
 
 Use it to find:
 
@@ -160,7 +160,7 @@ Make clear:
 
 - what is in scope now
 - what is out of scope now
-- what boundaries `execute` should not cross silently
+- what boundaries `ea-execute` should not cross silently
 
 ### 7. Lock Design Direction
 
@@ -192,7 +192,7 @@ The chosen test strategy should make sense for the kind of project and change.
 
 ### 9. Create Or Update Decision Notes When Needed
 
-`planning` is the main stage that writes decision notes.
+`ea-planning` is the main stage that writes decision notes.
 
 Write or update a decision note when:
 
@@ -202,7 +202,7 @@ Write or update a decision note when:
 
 Do **not** write a decision note for:
 
-- still-open brainstorming choices
+- still-open ea-brainstorming choices
 - tiny implementation details
 - information that only matters inside one short-lived plan
 
@@ -238,8 +238,8 @@ Keep TCs tied to their ACs.
 
 #### TC Writing Policy
 
-Write TCs before `$execute`.
-`$execute` runs the TC checklist; it should not have to invent better TCs.
+Write TCs before `$ea-execute`.
+`$ea-execute` runs the TC checklist; it should not have to invent better TCs.
 
 Use result-first TCs by default.
 
@@ -264,7 +264,7 @@ Every TC should answer:
 - what result proves this AC is done?
 - what failure would this TC catch?
 - is this the cheapest reliable check?
-- can `$execute` run or perform it without guessing?
+- can `$ea-execute` run or perform it without guessing?
 
 Use this routing guide:
 
@@ -285,7 +285,7 @@ Use this routing guide:
 
 ### 11. Use Planning Reviewers
 
-For non-trivial plans, use both `plan-arch` and `plan-devil` by default.
+For non-trivial plans, use both `ea-plan-arch` and `ea-plan-devil` by default.
 
 Non-trivial plans include:
 
@@ -293,7 +293,7 @@ Non-trivial plans include:
 - UI behavior changes
 - multi-file behavior changes
 - unclear test strategy
-- AC/TC shape that could force `$execute` to guess
+- AC/TC shape that could force `$ea-execute` to guess
 
 Tiny low-risk work may skip them.
 
@@ -304,9 +304,9 @@ Examples:
 - narrow copy edits
 - very small changes with obvious scope, TC, test strategy, and handoff
 
-Use `plan-arch` to check structure and fit.
+Use `ea-plan-arch` to check structure and fit.
 
-Use `plan-arch` when:
+Use `ea-plan-arch` when:
 
 - the design direction has real tradeoffs
 - the task shape is big enough that structure matters
@@ -314,25 +314,25 @@ Use `plan-arch` when:
 - the test strategy may not fit the work
 - TC routing may not fit the work
 - UI/browser verification may be under- or over-used
-- `$execute` may not be able to follow the plan without guessing
+- `$ea-execute` may not be able to follow the plan without guessing
 
-Use `plan-devil` to attack failure risk.
+Use `ea-plan-devil` to attack failure risk.
 
-Use `plan-devil` when:
+Use `ea-plan-devil` when:
 
 - the risk is high
 - the ACs still feel weak
 - the TCs feel weak or missing
 - TCs check implementation details instead of results
 - the plan may over-test or under-test the work
-- the handoff may force `$execute` to guess
+- the handoff may force `$ea-execute` to guess
 - the chosen test strategy feels too weak
 
 For tiny low-risk work, explain briefly why reviewers were skipped.
 
 ### 12. Write Execute Handoff
 
-End the plan with a simple block that `$execute` can read.
+End the plan with a simple block that `$ea-execute` can read.
 
 ### 13. Report Plan Before Approval
 
@@ -340,11 +340,11 @@ Before asking for approval, give the user a short clean report of the plan.
 
 That report should confirm:
 
-- the main planning conclusion
+- the main ea-planning conclusion
 - the main scope and non-goals
 - the design direction
 - the test strategy
-- the execute handoff
+- the ea-execute handoff
 - the open risks
 
 Do not paste the full plan back when a shorter report is enough.
@@ -364,9 +364,9 @@ Every plan should contain:
 - one task with ACs and TCs
 - execution order
 - open risks
-- execute handoff
+- ea-execute handoff
 
-If planning settled a meaningful long-lived choice, update or create the related decision note before finishing.
+If ea-planning settled a meaningful long-lived choice, update or create the related decision note before finishing.
 
 ## Plan Artifact Path
 
@@ -409,7 +409,7 @@ That summary should include:
 - what is in scope now
 - what stays out of scope now
 - the test strategy
-- the execute handoff fields
+- the ea-execute handoff fields
 - the main open risks
 
 ## Output Shape
@@ -433,23 +433,23 @@ Execute Handoff
 
 ## Rules
 
-- Do not brainstorm inside `planning`.
-- Do not implement inside `planning`.
+- Do not brainstorm inside `ea-planning`.
+- Do not implement inside `ea-planning`.
 - Do not dump long code-level examples.
 - Do not leave test strategy implicit.
 - Do not leave ACs without TCs.
-- Do not hand off to `$execute` if the plan still forces guessing.
+- Do not hand off to `$ea-execute` if the plan still forces guessing.
 - Do not skip the short user-facing plan report before asking for approval.
 - Do not paste the full plan file back when a clean summary is enough.
 - Do not create decision notes for every tiny choice.
 - Use simple English.
-- Put the main planning conclusion first when reporting the result.
+- Put the main ea-planning conclusion first when reporting the result.
 - Keep plan explanations clean and easy to scan.
 - If you explain a flow, use a real ASCII flow chart instead of a simple arrow list.
 
 ## Completion
 
-`planning` is complete only when:
+`ea-planning` is complete only when:
 
 - the direction is clear enough for execution
 - the plan file exists
@@ -457,7 +457,7 @@ Execute Handoff
 - design direction is clear enough
 - test strategy is explicit
 - `Task -> AC -> TC` is present and usable
-- the execute handoff is present
+- the ea-execute handoff is present
 - the user has seen a clean plan summary before approval
 - relevant accepted decisions were read when they mattered
 - any new meaningful accepted choice was written to a decision note when needed

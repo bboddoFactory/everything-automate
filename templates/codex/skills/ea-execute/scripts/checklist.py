@@ -32,7 +32,7 @@ def parse_state_root(raw: str) -> Path:
 
 
 def progress_file(state_root: Path, task_id: str) -> Path:
-    return state_root / "tasks" / task_id / "execute-progress.json"
+    return state_root / "tasks" / task_id / "ea-execute-progress.json"
 
 
 def task_dir(state_root: Path, task_id: str) -> Path:
@@ -40,11 +40,11 @@ def task_dir(state_root: Path, task_id: str) -> Path:
 
 
 def worker_report_file(state_root: Path, task_id: str) -> Path:
-    return task_dir(state_root, task_id) / "worker-report.json"
+    return task_dir(state_root, task_id) / "ea-worker-report.json"
 
 
 def advisor_handoff_file(state_root: Path, task_id: str) -> Path:
-    return task_dir(state_root, task_id) / "advisor-handoff.json"
+    return task_dir(state_root, task_id) / "ea-advisor-handoff.json"
 
 
 def retry_packet_file(state_root: Path, task_id: str) -> Path:
@@ -83,7 +83,7 @@ def read_stdin_json(*, required: bool) -> dict[str, Any]:
 def write_progress(path: Path, payload: dict[str, Any]) -> None:
     payload["updated_at"] = utc_now()
     payload.setdefault("schema_version", SCHEMA_VERSION)
-    payload.setdefault("writer", "execute/scripts/checklist.py")
+    payload.setdefault("writer", "ea-execute/scripts/checklist.py")
     write_json(path, payload)
 
 
@@ -261,7 +261,7 @@ def write_packet(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload["updated_at"] = utc_now()
     payload.setdefault("schema_version", SCHEMA_VERSION)
-    payload.setdefault("writer", "execute/scripts/checklist.py")
+    payload.setdefault("writer", "ea-execute/scripts/checklist.py")
     write_json(path, payload)
 
 
@@ -285,7 +285,7 @@ def execute_start_cmd(args: argparse.Namespace) -> None:
         "latest_evidence": None,
         "best_resume_point": "pick first AC",
         "updated_at": utc_now(),
-        "writer": "execute/scripts/checklist.py",
+        "writer": "ea-execute/scripts/checklist.py",
     }
     write_json(path, progress)
     dump_json({"ok": True, "progress_file": str(path), "task_id": args.task_id})
@@ -496,10 +496,10 @@ def retry_packet_cmd(args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Manage the installed execute checklist artifact.")
+    parser = argparse.ArgumentParser(description="Manage the installed ea-execute checklist artifact.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    start_parser = subparsers.add_parser("execute-start", help="create a live checklist from stdin JSON")
+    start_parser = subparsers.add_parser("ea-execute-start", help="create a live checklist from stdin JSON")
     start_parser.add_argument("--state-root", default=DEFAULT_STATE_ROOT)
     start_parser.add_argument("--task-id", required=True)
     start_parser.add_argument("--plan-path")
@@ -537,14 +537,14 @@ def build_parser() -> argparse.ArgumentParser:
     ac_complete_parser.add_argument("--ac-id", required=True)
     ac_complete_parser.set_defaults(func=ac_complete_cmd)
 
-    worker_report_parser = subparsers.add_parser("worker-report", help="write the latest durable worker report from stdin JSON")
+    worker_report_parser = subparsers.add_parser("ea-worker-report", help="write the latest durable ea-worker report from stdin JSON")
     worker_report_parser.add_argument("--state-root", default=DEFAULT_STATE_ROOT)
     worker_report_parser.add_argument("--task-id", required=True)
     worker_report_parser.add_argument("--ac-id")
     worker_report_parser.add_argument("--tc-id")
     worker_report_parser.set_defaults(func=worker_report_cmd)
 
-    advisor_handoff_parser = subparsers.add_parser("advisor-handoff", help="write the latest advisor handoff from stdin JSON")
+    advisor_handoff_parser = subparsers.add_parser("ea-advisor-handoff", help="write the latest ea-advisor handoff from stdin JSON")
     advisor_handoff_parser.add_argument("--state-root", default=DEFAULT_STATE_ROOT)
     advisor_handoff_parser.add_argument("--task-id", required=True)
     advisor_handoff_parser.add_argument("--ac-id")

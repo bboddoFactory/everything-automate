@@ -1,6 +1,6 @@
 ---
 title: Everything Automate
-description: Codex-first reusable agent workflow project with brainstorming, planning, execute, and global Codex setup.
+description: Codex-first reusable agent workflow project with ea-brainstorming, ea-planning, ea-execute, and global Codex setup.
 doc_type: guide
 scope:
   - project overview
@@ -21,18 +21,18 @@ Right now the active implementation path is **Codex-first**.
 The current in-session workflow is:
 
 ```text
-$brainstorming
-  -> $planning
-  -> $execute
+$ea-brainstorming
+  -> $ea-planning
+  -> $ea-execute
 ```
 
 ## What It Does
 
-- `$brainstorming`
+- `$ea-brainstorming`
   helps turn a vague idea into a clear direction
-- `$planning`
-  turns a clear request into a plan that `$execute` can use
-- `$execute`
+- `$ea-planning`
+  turns a clear request into a plan that `$ea-execute` can use
+- `$ea-execute`
   uses an approved plan, does the work, checks the result, and decides what to do next
 
 Under the hood, the project also has:
@@ -47,7 +47,7 @@ Current active focus:
 
 - Codex workflow surfaces
 - Codex global setup
-- `M5` execute hardening
+- `M5` ea-execute hardening
 
 Not current active scope here:
 
@@ -72,9 +72,9 @@ Current global install writes:
 
 - `~/.codex/AGENTS.md`
 - `~/.codex/agents/*.toml`
-- `~/.codex/skills/brainstorming/`
-- `~/.codex/skills/planning/`
-- `~/.codex/skills/execute/`
+- `~/.codex/skills/ea-brainstorming/`
+- `~/.codex/skills/ea-planning/`
+- `~/.codex/skills/ea-execute/`
 
 It also:
 
@@ -98,7 +98,7 @@ It also:
   docs index
 - [docs/specs/everything-automate-implementation-milestones.md](docs/specs/everything-automate-implementation-milestones.md)
   current milestone map
-- [docs/specs/everything-automate-codex-execute-hardening.md](docs/specs/everything-automate-codex-execute-hardening.md)
+- [docs/specs/everything-automate-codex-ea-execute-hardening.md](docs/specs/everything-automate-codex-ea-execute-hardening.md)
   current `M5` working document
 - [templates/codex/INSTALL.md](templates/codex/INSTALL.md)
   Codex install shape

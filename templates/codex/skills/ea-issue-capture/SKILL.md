@@ -1,16 +1,16 @@
 ---
-name: issue-capture
+name: ea-issue-capture
 description: Capture an Everything Automate improvement idea from another project session and create a backlog GitHub issue in yhyuntak/everything-automate.
 argument-hint: "<EA improvement idea, pain point, missing feature, or raw context>"
 ---
 
-# issue-capture
+# ea-issue-capture
 
 Use this when work in another project reveals something that Everything Automate should improve.
 
 ## Purpose
 
-`issue-capture` is a backlog input skill.
+`ea-issue-capture` is a backlog input skill.
 
 Its job is to:
 
@@ -22,7 +22,7 @@ Its job is to:
 
 ## Use When
 
-Use `issue-capture` when:
+Use `ea-issue-capture` when:
 
 - you are in another project session
 - you notice missing EA workflow help
@@ -31,7 +31,7 @@ Use `issue-capture` when:
 
 ## Do Not Use When
 
-Do **not** use `issue-capture` when:
+Do **not** use `ea-issue-capture` when:
 
 - the work should be fixed in the current repo, not in EA
 - you already have the EA issue open and want to continue that work
@@ -58,7 +58,7 @@ Do not pretend the issue was created if the tool call failed.
 
 ## Interaction Policy
 
-`issue-capture` is mostly non-interactive.
+`ea-issue-capture` is mostly non-interactive.
 
 Default rule:
 
@@ -128,7 +128,7 @@ Keep the final report short.
 
 ## Rules
 
-- do not turn capture into planning
+- do not turn capture into ea-planning
 - do not spend time on duplicate hunting in v1
 - do not add many labels in v1
 - do not create the issue in the wrong repository

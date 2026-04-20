@@ -20,6 +20,28 @@ from install_common import (
 )
 
 
+LEGACY_MANAGED_AGENT_FILES = (
+    "advisor.toml",
+    "code-reviewer.toml",
+    "ea-qa-reviewer.toml",
+    "explorer.toml",
+    "harness-reviewer.toml",
+    "plan-arch.toml",
+    "plan-devil.toml",
+    "qa-reviewer.toml",
+    "worker.toml",
+)
+
+LEGACY_MANAGED_SKILL_DIRS = (
+    "brainstorming",
+    "execute",
+    "issue-capture",
+    "issue-pick",
+    "planning",
+    "qa",
+)
+
+
 @dataclass(frozen=True)
 class ProviderSpec:
     name: str
@@ -73,6 +95,23 @@ def copy_with_backup(src: Path, dst: Path, spec: ProviderSpec) -> dict[str, str 
     }
 
 
+def remove_with_backup(path: Path, spec: ProviderSpec) -> dict[str, str | None]:
+    backup_path = spec.backup_root / path.relative_to(spec.install_root)
+    backup_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if path.is_dir():
+        shutil.copytree(path, backup_path, dirs_exist_ok=True)
+        shutil.rmtree(path)
+    else:
+        shutil.copy2(path, backup_path)
+        path.unlink()
+
+    return {
+        "target": str(path),
+        "backup_path": str(backup_path),
+    }
+
+
 def render_agent_with_backup(agent_md: Path, dst: Path, spec: ProviderSpec) -> dict[str, str | None]:
     dst.parent.mkdir(parents=True, exist_ok=True)
     backup_path: Path | None = None
@@ -105,6 +144,7 @@ def write_manifest(
     *,
     status: str,
     installed_assets: list[dict[str, str | None]],
+    removed_legacy_assets: list[dict[str, str | None]] | None = None,
     missing_assets: list[str] | None = None,
     failed_asset: str | None = None,
     error: str | None = None,
@@ -119,6 +159,7 @@ def write_manifest(
         "manifest_path": str(spec.manifest_path),
         "written_at": now_utc(),
         "installed_assets": installed_assets,
+        "removed_legacy_assets": removed_legacy_assets or [],
         "missing_assets": missing_assets or [],
         "failed_asset": failed_asset,
         "error": error,
@@ -141,8 +182,31 @@ def codex_asset_targets(spec: ProviderSpec) -> list[tuple[str, Path, Path]]:
     return assets
 
 
+def remove_legacy_managed_assets(spec: ProviderSpec) -> list[dict[str, str | None]]:
+    removed: list[dict[str, str | None]] = []
+
+    for filename in LEGACY_MANAGED_AGENT_FILES:
+        path = spec.agents_root / filename
+        if not path.exists():
+            continue
+        result = remove_with_backup(path, spec)
+        result["kind"] = "legacy-agent"
+        removed.append(result)
+
+    for dirname in LEGACY_MANAGED_SKILL_DIRS:
+        path = spec.skills_root / dirname
+        if not path.exists():
+            continue
+        result = remove_with_backup(path, spec)
+        result["kind"] = "legacy-skill"
+        removed.append(result)
+
+    return removed
+
+
 def run_setup(spec: ProviderSpec) -> int:
     installed_assets: list[dict[str, str | None]] = []
+    removed_legacy_assets: list[dict[str, str | None]] = []
     spec.install_root.mkdir(parents=True, exist_ok=True)
 
     try:
@@ -153,11 +217,13 @@ def run_setup(spec: ProviderSpec) -> int:
                 result = copy_with_backup(src, dst, spec)
             result["kind"] = asset_kind
             installed_assets.append(result)
+        removed_legacy_assets = remove_legacy_managed_assets(spec)
     except Exception as exc:  # pragma: no cover - failure path exercised by manual setup
         write_manifest(
             spec,
             status="failed",
             installed_assets=installed_assets,
+            removed_legacy_assets=removed_legacy_assets,
             failed_asset=str(dst),
             error=str(exc),
         )
@@ -172,7 +238,12 @@ def run_setup(spec: ProviderSpec) -> int:
         print(f"- manifest: {spec.manifest_path}", file=sys.stderr)
         return 1
 
-    write_manifest(spec, status="ok", installed_assets=installed_assets)
+    write_manifest(
+        spec,
+        status="ok",
+        installed_assets=installed_assets,
+        removed_legacy_assets=removed_legacy_assets,
+    )
 
     print("Installed everything-automate global Codex setup.")
     print(f"- install root: {spec.install_root}")
@@ -181,6 +252,10 @@ def run_setup(spec: ProviderSpec) -> int:
     print("- installed assets:")
     for asset in installed_assets:
         print(f"  - {asset['target']}")
+    if removed_legacy_assets:
+        print("- removed legacy managed assets:")
+        for asset in removed_legacy_assets:
+            print(f"  - {asset['target']}")
     return 0
 
 
@@ -213,6 +288,17 @@ def run_doctor(spec: ProviderSpec) -> int:
         print("- found:")
         for asset in found_assets:
             print(f"  - {asset}")
+
+    legacy_assets = [
+        *(spec.agents_root / filename for filename in LEGACY_MANAGED_AGENT_FILES),
+        *(spec.skills_root / dirname for dirname in LEGACY_MANAGED_SKILL_DIRS),
+    ]
+    found_legacy = [str(path) for path in legacy_assets if path.exists()]
+    if found_legacy:
+        print("- legacy managed assets still present:")
+        for asset in found_legacy:
+            print(f"  - {asset}")
+        return 1
 
     if missing_assets:
         print("- missing:")

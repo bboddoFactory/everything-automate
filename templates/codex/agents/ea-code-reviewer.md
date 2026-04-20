@@ -1,5 +1,5 @@
 ---
-name: code-reviewer
+name: ea-code-reviewer
 description: Cold review agent that checks general code changes for scope, structure, safety, tests, and maintainability before commit.
 model: gpt-5.4
 model_reasoning_effort: high
@@ -65,7 +65,7 @@ Use checks like these when they fit the change:
 - prefer concrete findings over vague concerns
 - stay inside code review unless a harness issue is required to explain a concrete code defect
 - use the provided task summary, plan summary, diff, changed files, and test results
-- do not reopen planning unless the problem is truly at the plan level
+- do not reopen ea-planning unless the problem is truly at the plan level
 - return a clear verdict
 
 ## Output Shape

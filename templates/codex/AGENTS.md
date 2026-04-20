@@ -12,10 +12,10 @@ Runtime helpers and state tools exist to support that workflow, not replace it.
 
 ```text
 inside Codex
-  -> $brainstorming
-  -> $planning
-  -> $execute
-  -> $qa
+  -> $ea-brainstorming
+  -> $ea-planning
+  -> $ea-execute
+  -> $ea-qa
 
 under the hood
   -> handoff
@@ -33,7 +33,7 @@ under the hood
 - the kernel discipline remains:
 
 ```text
-plan -> execute -> verify -> decide
+plan -> ea-execute -> verify -> decide
 ```
 
 ## Language Rule
@@ -146,7 +146,7 @@ Good:
 Do not treat this as a flow chart:
 
 ```text
-plan -> execute -> verify -> decide
+plan -> ea-execute -> verify -> decide
 ```
 
 That is only a short chain, not a real flow chart.
@@ -155,10 +155,10 @@ That is only a short chain, not a real flow chart.
 
 Primary in-session workflow surface:
 
-- `$brainstorming`
-- `$planning`
-- `$execute`
-- `$qa`
+- `$ea-brainstorming`
+- `$ea-planning`
+- `$ea-execute`
+- `$ea-qa`
 
 Current internal support surface in this source repo:
 
@@ -172,25 +172,25 @@ The current global setup does not install that wrapper into `~/.codex/`.
 Current agent roster:
 
 Planning agents:
-- `explorer`
-- `plan-arch`
-- `plan-devil`
+- `ea-explorer`
+- `ea-plan-arch`
+- `ea-plan-devil`
 
 Execute agents:
-- `worker`
-- `advisor`
+- `ea-worker`
+- `ea-advisor`
 
 QA review agents:
-- `code-reviewer`
-- `harness-reviewer`
+- `ea-code-reviewer`
+- `ea-harness-reviewer`
 
 Current note:
 
-- `$brainstorming` is the idea-shaping surface before planning.
-- `$planning` is the execution-planning surface after direction is clear enough.
-- `$execute` is the TC-first execution surface after an approved planning handoff and before `$qa`.
-- Calling `$execute` is an explicit request to use the `worker` subagent for implementation work; the main LLM stays the controller.
-- `$execute` normally continues into `$qa` before `commit` when the work is ready for review.
-- `$qa` is the final review-and-judgment gate before `commit`.
-- support skills such as `issue-capture` and `issue-pick` may feed backlog work into `$brainstorming`, but they are not main workflow stages.
+- `$ea-brainstorming` is the idea-shaping surface before ea-planning.
+- `$ea-planning` is the execution planning surface after direction is clear enough.
+- `$ea-execute` is the TC-first execution surface after an approved ea-planning handoff and before `$ea-qa`.
+- Calling `$ea-execute` is an explicit request to use the `ea-worker` subagent for implementation work; the main LLM stays the controller.
+- `$ea-execute` normally continues into `$ea-qa` before `commit` when the work is ready for review.
+- `$ea-qa` is the final review-and-judgment gate before `commit`.
+- support skills such as `ea-issue-capture` and `ea-issue-pick` may feed backlog work into `$ea-brainstorming`, but they are not main workflow stages.
 - hidden runtime/state helpers may support the flow, but they are not the main user workflow.

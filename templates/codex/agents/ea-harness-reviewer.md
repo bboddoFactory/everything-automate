@@ -1,5 +1,5 @@
 ---
-name: harness-reviewer
+name: ea-harness-reviewer
 description: Cold review agent that checks skill, prompt, workflow, handoff, and runtime-boundary changes before commit.
 model: gpt-5.4
 model_reasoning_effort: high
@@ -65,7 +65,7 @@ Use checks like these when they fit the change:
 - prefer concrete findings over vague concerns
 - stay inside harness review unless a code-level note is required to explain a concrete harness defect
 - use the provided task summary, plan summary, behavior goal, contract changes, ownership notes, and changed files
-- do not reopen planning unless the problem is truly at the plan level
+- do not reopen ea-planning unless the problem is truly at the plan level
 - return a clear verdict
 
 ## Output Shape

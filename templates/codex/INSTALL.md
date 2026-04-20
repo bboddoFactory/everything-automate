@@ -27,15 +27,15 @@ start Codex session
 
 ## Current Workflow Shape
 
-- `$brainstorming`
-- `$planning`
-- `$execute`
-- `$qa`
+- `$ea-brainstorming`
+- `$ea-planning`
+- `$ea-execute`
+- `$ea-qa`
 
 Current support skills:
 
-- `issue-capture`
-- `issue-pick`
+- `ea-issue-capture`
+- `ea-issue-pick`
 
 ## Local Repo Test Path
 
@@ -44,7 +44,7 @@ For local testing inside this repository:
 1. install project-local skills and agents into `./.codex/`
 2. keep the root `AGENTS.md` as the authoring contract
 3. treat `templates/codex/AGENTS.md` as the runtime guidance reference for the test
-4. run a planning-only Codex session that writes a plan artifact to `.everything-automate/plans/`
+4. run a ea-planning-only Codex session that writes a plan artifact to `.everything-automate/plans/`
 
 Current helper scripts:
 
@@ -56,7 +56,7 @@ Current helper scripts:
 Note:
 
 - In this GPU server environment, Codex `workspace-write` sandbox can fail with `bwrap: loopback: Failed RTM_NEWADDR`.
-- The local planning test currently uses `--dangerously-bypass-approvals-and-sandbox` so Codex can actually read and write repo files during the test.
+- The local ea-planning test currently uses `--dangerously-bypass-approvals-and-sandbox` so Codex can actually read and write repo files during the test.
 
 Internal support tools currently present in the authoring repo:
 
@@ -72,9 +72,9 @@ The current global setup does not materialize it into `~/.codex/`.
 
 After setup, the Codex path should:
 
-- make `$brainstorming`, `$planning`, `$execute`, and `$qa` the active in-session workflow surfaces
+- make `$ea-brainstorming`, `$ea-planning`, `$ea-execute`, and `$ea-qa` the active in-session workflow surfaces
 - install support skills for GitHub backlog capture and pick-up
-- let approved plans hand off into `$execute` cleanly
+- let approved plans hand off into `$ea-execute` cleanly
 - keep state and recovery underneath the UX
 - support `status`, `cancel`, and `resume` without forcing the user into a wrapper-first workflow
 - back up replaced global assets before overwriting them
@@ -83,14 +83,14 @@ After setup, the Codex path should:
 ## Status
 
 This is now a partial implementation guide.
-The current runtime helper exists, and the active user-facing Codex workflow skills right now are `$brainstorming`, `$planning`, `$execute`, and `$qa`.
-The current installed support skills right now are `issue-capture` and `issue-pick`.
+The current runtime helper exists, and the active user-facing Codex workflow skills right now are `$ea-brainstorming`, `$ea-planning`, `$ea-execute`, and `$ea-qa`.
+The current installed support skills right now are `ea-issue-capture` and `ea-issue-pick`.
 The current global setup v0 is:
 
 - `setup`
   - materialize `~/.codex/AGENTS.md`
   - materialize `~/.codex/agents/*.toml`
-  - materialize `~/.codex/skills/{brainstorming,planning,execute,qa,issue-capture,issue-pick}/`
+  - materialize `~/.codex/skills/{ea-brainstorming,ea-planning,ea-execute,ea-qa,ea-issue-capture,ea-issue-pick}/`
   - write a managed install manifest under `~/.codex/everything-automate/`
   - back up replaced assets under `~/.codex/backups/<timestamp>/`
 - `doctor`

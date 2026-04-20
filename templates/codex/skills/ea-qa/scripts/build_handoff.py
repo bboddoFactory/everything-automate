@@ -32,7 +32,7 @@ def parse_state_root(raw: str) -> Path:
 
 
 def progress_file(state_root: Path, task_id: str) -> Path:
-    return state_root / "tasks" / task_id / "execute-progress.json"
+    return state_root / "tasks" / task_id / "ea-execute-progress.json"
 
 
 def state_file(state_root: Path, task_id: str) -> Path:
@@ -40,7 +40,7 @@ def state_file(state_root: Path, task_id: str) -> Path:
 
 
 def qa_handoff_file(state_root: Path, task_id: str) -> Path:
-    return state_root / "tasks" / task_id / "qa-handoff.json"
+    return state_root / "tasks" / task_id / "ea-qa-handoff.json"
 
 
 def read_json(path: Path, *, required: bool) -> dict[str, Any]:
@@ -151,7 +151,7 @@ def build_handoff(*, task_id: str, progress: dict[str, Any], state: dict[str, An
             "terminal_reason": state.get("terminal_reason"),
         } if state else None,
         "updated_at": utc_now(),
-        "writer": "qa/scripts/build_handoff.py",
+        "writer": "ea-qa/scripts/build_handoff.py",
     }
 
 

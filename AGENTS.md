@@ -47,4 +47,4 @@
   - what changed
   - why it changed
   - how it was verified
-- Include file paths or commands where useful, for example `templates/codex/skills/planning/SKILL.md` or `python3 scripts/install_global.py doctor --provider codex`.
+- Include file paths or commands where useful, for example `templates/codex/skills/ea-planning/SKILL.md` or `python3 scripts/install_global.py doctor --provider codex`.

@@ -2,24 +2,20 @@
 
 This directory holds the narrow agent prompts for the Codex template.
 
-Current planning roster:
+Current ea-planning roster:
 
-- `explorer.md`
-- `plan-arch.md`
-- `plan-devil.md`
+- `ea-explorer.md`
+- `ea-plan-arch.md`
+- `ea-plan-devil.md`
 
-Current execute agents:
+Current ea-execute agents:
 
-- `worker.md`
-- `advisor.md`
+- `ea-worker.md`
+- `ea-advisor.md`
 
 Current QA review agents:
 
-- `code-reviewer.md`
-- `harness-reviewer.md`
-
-Legacy QA reviewer prompt:
-
-- `qa-reviewer.md`
+- `ea-code-reviewer.md`
+- `ea-harness-reviewer.md`
 
 These agents support the current in-session workflow and are intentionally narrow in scope.

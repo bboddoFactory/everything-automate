@@ -4,8 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLAN_SLUG="${1:-ralph-implementation-v0}"
 PLAN_PATH="$ROOT/.everything-automate/plans/$(date +%F)-${PLAN_SLUG}.md"
-PROMPT_PATH="$ROOT/.everything-automate/testing/codex-planning-test-prompt.md"
-LAST_MESSAGE_PATH="$ROOT/.everything-automate/testing/codex-planning-last-message.md"
+PROMPT_PATH="$ROOT/.everything-automate/testing/codex-ea-planning-test-prompt.md"
+LAST_MESSAGE_PATH="$ROOT/.everything-automate/testing/codex-ea-planning-last-message.md"
 
 mkdir -p "$(dirname "$PLAN_PATH")" "$(dirname "$PROMPT_PATH")"
 
@@ -16,7 +16,7 @@ Use the project-local skills installed under ./.codex/skills and the project-loc
 
 For this test, treat ./templates/codex/AGENTS.md as the runtime guidance reference.
 
-Invoke \$planning for this repository and create an execution-ready plan artifact at:
+Invoke \$ea-planning for this repository and create an execution-ready plan artifact at:
 $PLAN_PATH
 
 The plan is for implementing the Ralph loop in this repository.

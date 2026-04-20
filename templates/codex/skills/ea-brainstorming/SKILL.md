@@ -1,16 +1,16 @@
 ---
-name: brainstorming
+name: ea-brainstorming
 description: Help shape an idea, feature, design direction, or document direction before deciding what to do next.
 argument-hint: "<idea, feature, design question, doc idea, or vague request>"
 ---
 
-# brainstorming
+# ea-brainstorming
 
 Use this when the user needs help thinking, not just help planning execution.
 
 ## Purpose
 
-`brainstorming` is a thinking skill.
+`ea-brainstorming` is a thinking skill.
 
 Its job is to:
 
@@ -24,14 +24,14 @@ Its job is to:
 That next step may be:
 
 - stop here
-- keep brainstorming
-- move to `$planning`
+- keep ea-brainstorming
+- move to `$ea-planning`
 
-`brainstorming` does **not** have to end in planning.
+`ea-brainstorming` does **not** have to end in ea-planning.
 
 ## Use When
 
-Use `brainstorming` when the user wants help with any of these:
+Use `ea-brainstorming` when the user wants help with any of these:
 
 - shaping a raw idea
 - turning a backlog item into something clearer
@@ -42,18 +42,18 @@ Use `brainstorming` when the user wants help with any of these:
 
 ## Do Not Use When
 
-Do **not** use `brainstorming` when:
+Do **not** use `ea-brainstorming` when:
 
-- the request is already clear enough for `$planning`
+- the request is already clear enough for `$ea-planning`
 - the user already wants a file-based execution plan
 - the user already has an approved plan and wants implementation
 - the task is only to review finished work
 
 ## Core Rule
 
-`brainstorming` is not implementation.
-It is not execution planning.
-It is not a hidden version of `$planning`.
+`ea-brainstorming` is not implementation.
+It is not execution ea-planning.
+It is not a hidden version of `$ea-planning`.
 
 Its job is to help the user think clearly enough to choose a direction.
 
@@ -79,7 +79,7 @@ Use this when the user is thinking about a document, note, guide, spec, README, 
 
 ## Interaction Style
 
-`brainstorming` is interactive by default.
+`ea-brainstorming` is interactive by default.
 
 - Ask one strong question at a time.
 - Do not dump a long checklist on the user.
@@ -145,15 +145,15 @@ request
   -> recommend or synthesize
   -> choose next step
      -> stop
-     -> keep brainstorming
-     -> move to $planning
+     -> keep ea-brainstorming
+     -> move to $ea-planning
 ```
 
 ## Rules
 
-- Do not implement during brainstorming.
-- Do not turn brainstorming into hidden planning.
-- Do not force the user into `$planning` if they only want thought cleanup.
+- Do not implement during ea-brainstorming.
+- Do not turn ea-brainstorming into hidden ea-planning.
+- Do not force the user into `$ea-planning` if they only want thought cleanup.
 - Do not use one rigid question list for every lane.
 - Do not force one rigid output template for every brainstorm.
 - Ask about the reason behind the request before pushing too fast into how to build it.
@@ -171,7 +171,7 @@ Allowed output modes include:
 - `doc direction note`
 - `option comparison`
 - `recommended direction`
-- `planning handoff note`
+- `ea-planning handoff note`
 
 Do not force the same shape every time.
 
@@ -182,22 +182,22 @@ No matter which mode you use, the result should make these clear enough:
 - what is still open, if anything
 - what the next step should be
 
-## When To Move To `$planning`
+## When To Move To `$ea-planning`
 
-Move to `$planning` only when the user now wants execution planning.
+Move to `$ea-planning` only when the user now wants execution ea-planning.
 
 That usually means:
 
 - the direction is clear enough
 - scope is clear enough
-- the user wants real implementation planning
+- the user wants real implementation ea-planning
 - a file-based plan would now help more than another thinking pass
 
 ## Completion
 
-`brainstorming` is complete when:
+`ea-brainstorming` is complete when:
 
 - the user can see the direction more clearly
 - the conversation has produced a useful thinking result
 - the next step is clear
-- the user can either stop, continue brainstorming, or move to `$planning`
+- the user can either stop, continue ea-brainstorming, or move to `$ea-planning`
