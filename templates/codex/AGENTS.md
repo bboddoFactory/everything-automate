@@ -184,6 +184,9 @@ QA review agents:
 - `ea-code-reviewer`
 - `ea-harness-reviewer`
 
+Docs agents:
+- `ea-docs-worker`
+
 Current note:
 
 - `$ea-brainstorming` is the idea-shaping surface before ea-planning.
@@ -192,5 +195,5 @@ Current note:
 - Calling `$ea-execute` is an explicit request to use the `ea-worker` subagent for implementation work; the main LLM stays the controller.
 - `$ea-execute` normally continues into `$ea-qa` before `commit` when the work is ready for review.
 - `$ea-qa` is the final review-and-judgment gate before `commit`.
-- support skills such as `ea-issue-capture` and `ea-issue-pick` may feed backlog work into `$ea-brainstorming`, but they are not main workflow stages.
+- support skills such as `ea-docs`, `ea-issue-capture`, and `ea-issue-pick` may feed docs or backlog work into the main workflow, but they are not main workflow stages.
 - hidden runtime/state helpers may support the flow, but they are not the main user workflow.

@@ -16,9 +16,11 @@ Current active in-session workflow surface:
 
 Support skills:
 
+- `ea-docs/`
 - `ea-issue-capture/`
 - `ea-issue-pick/`
 
+`ea-docs/` sets up, checks, and maintains an LLM Wiki docs structure for project work.
 `ea-issue-capture/` creates a real backlog GitHub issue in `yhyuntak/everything-automate` from another project session.
 `ea-issue-pick/` reads one open backlog issue and turns it into input for `$ea-brainstorming`.
 

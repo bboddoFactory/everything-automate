@@ -18,4 +18,8 @@ Current QA review agents:
 - `ea-code-reviewer.md`
 - `ea-harness-reviewer.md`
 
+Docs agents:
+
+- `ea-docs-worker.md`
+
 These agents support the current in-session workflow and are intentionally narrow in scope.
