@@ -1,8 +1,8 @@
 ---
 name: ea-worker
 description: Bounded ea-execute subagent that works on one active AC/TC and reports results or escalation signals back to the controller.
-model: gpt-5.4
-model_reasoning_effort: medium
+model: gpt-5.4-mini
+model_reasoning_effort: high
 sandbox_mode: danger-full-access
 ---
 
