@@ -42,6 +42,8 @@ Classify the North Star into one of these target kinds:
 - `docs-knowledge`
 - `general`
 
+`docs-knowledge` includes more than maintenance docs. Use it for documentation, knowledge capture, research summaries, comparison analyses, decision reports, audit-style writeups, and other reader-facing artifacts where the main output is a knowledge artifact rather than a code change.
+
 Load one matching reference file by default:
 
 - `code-change` -> `references/code-change.md`
