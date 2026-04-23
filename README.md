@@ -89,6 +89,10 @@ Current global install writes:
 - `~/.codex/skills/ea-planning/`
 - `~/.codex/skills/ea-execute/`
 - `~/.codex/skills/ea-qa/`
+- `~/.codex/skills/ea-docs/`
+- `~/.codex/skills/ea-issue-capture/`
+- `~/.codex/skills/ea-issue-pick/`
+- `~/.codex/skills/ea-upstream/`
 
 It also:
 

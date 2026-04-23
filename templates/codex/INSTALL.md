@@ -37,8 +37,10 @@ start Codex session
 
 Current support skills:
 
+- `ea-docs`
 - `ea-issue-capture`
 - `ea-issue-pick`
+- `ea-upstream`
 
 ## Local Repo Test Path
 
@@ -76,7 +78,7 @@ The current global setup does not materialize it into `~/.codex/`.
 After setup, the Codex path should:
 
 - make `$ea-brainstorming`, `$ea-north-star`, `$ea-blueprint`, `$ea-planning`, `$ea-execute`, and `$ea-qa` the active in-session workflow surfaces
-- install support skills for GitHub backlog capture and pick-up
+- install support skills for docs work, GitHub backlog capture and pick-up, and upstream harness fixes
 - install the active-state hook that reads `.everything-automate/state/active.md`
 - let approved plans hand off into `$ea-execute` cleanly
 - keep state and recovery underneath the UX
@@ -88,7 +90,7 @@ After setup, the Codex path should:
 
 This is now a partial implementation guide.
 The current runtime helper exists, and the active user-facing Codex workflow skills right now are `$ea-brainstorming`, `$ea-north-star`, `$ea-blueprint`, `$ea-planning`, `$ea-execute`, and `$ea-qa`.
-The current installed support skills right now are `ea-issue-capture` and `ea-issue-pick`.
+The current installed support skills right now are `ea-docs`, `ea-issue-capture`, `ea-issue-pick`, and `ea-upstream`.
 The current global setup v0 is:
 
 - `setup`
@@ -96,7 +98,7 @@ The current global setup v0 is:
   - materialize `~/.codex/hooks.json`
   - materialize `~/.codex/hooks/`
   - materialize `~/.codex/agents/*.toml`
-  - materialize `~/.codex/skills/{ea-brainstorming,ea-north-star,ea-blueprint,ea-planning,ea-execute,ea-qa,ea-issue-capture,ea-issue-pick}/`
+  - materialize `~/.codex/skills/{ea-brainstorming,ea-north-star,ea-blueprint,ea-planning,ea-execute,ea-qa,ea-docs,ea-issue-capture,ea-issue-pick,ea-upstream}/`
   - write a managed install manifest under `~/.codex/everything-automate/`
   - back up replaced assets under `~/.codex/backups/<timestamp>/`
 - `doctor`
