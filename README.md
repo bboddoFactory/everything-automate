@@ -34,7 +34,7 @@ $ea-brainstorming
 - `$ea-brainstorming`
   helps turn a vague idea into a clear direction
 - `$ea-north-star`
-  locks a fuzzy target into one clear goal
+  bootstraps a dedicated worktree, then locks a fuzzy target into one clear goal
 - `$ea-blueprint`
   turns a locked goal into a buildable design spec
 - `$ea-planning`

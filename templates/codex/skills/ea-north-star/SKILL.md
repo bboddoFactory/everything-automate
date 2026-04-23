@@ -45,6 +45,8 @@ Do not use this skill when:
 
 North Star is target clarification only.
 
+North Star starts by bootstrapping a dedicated git worktree for the target.
+
 It does not own:
 
 - blueprinting
@@ -55,9 +57,29 @@ It does not own:
 
 Design ideas may appear during North Star. Do not discard them, and do not let them redefine the goal. Put them in `Spec Seeds`.
 
+## Worktree Bootstrap
+
+North Star is the only workflow skill that starts by preparing a dedicated worktree.
+
+Before any real North Star questioning:
+
+- derive a short slug from the rough goal
+- create or reuse a dedicated long-lived git worktree for that slug
+- create `.everything-automate/state/active.md` inside that worktree only
+- do not create `active.md` in the shared checkout
+
+After the worktree and active file are ready:
+
+- tell the user the worktree path
+- tell the user to move into that worktree
+- tell the user to start a new Codex session there
+- stop the current North Star session after setup
+
+The current session does not continue the real North Star conversation after bootstrap. The user resumes North Star from inside the new worktree session.
+
 ## State File
 
-When North Star mode starts, create or update:
+When North Star mode starts, first prepare the dedicated worktree, then create or update:
 
 - `.everything-automate/state/active.md`
 
@@ -140,6 +162,7 @@ Follow this pipeline:
 
 ```text
 raw intent
+  -> worktree bootstrap
   -> user mental picture
   -> one-sentence North Star draft
   -> scope and non-goals
@@ -151,7 +174,9 @@ raw intent
 
 ## Step 1: Capture Raw Intent
 
-Create `active.md` early. Do not wait until the goal is polished.
+Create or reuse the dedicated worktree first.
+
+Then create `active.md` in that worktree early. Do not wait until the goal is polished.
 
 Capture:
 
@@ -161,6 +186,8 @@ Capture:
 - what is still unclear
 
 Keep the file useful, not perfect.
+
+Do not continue the real North Star conversation in the shared checkout after this bootstrap step. Stop after you tell the user where to continue.
 
 ## Step 2: Extract The Mental Picture
 
@@ -294,6 +321,7 @@ Do not leave a locked `active.md` in place by default. A locked North Star at th
 
 When reporting to the user, keep it short:
 
+- worktree path, if bootstrap just happened
 - current North Star
 - what became clearer
 - what was parked

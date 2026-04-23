@@ -278,7 +278,7 @@ Docs agents:
 Current note:
 
 - `$ea-brainstorming` is the idea-shaping surface before ea-planning.
-- `$ea-north-star` is the goal-lock surface when the target is fuzzy and drift risk is high.
+- `$ea-north-star` is the goal-lock surface when the target is fuzzy and drift risk is high, and it starts by preparing a dedicated worktree for that target.
 - `$ea-blueprint` is the design-spec surface after North Star and before ea-planning.
 - `$ea-planning` is the execution planning surface after direction is clear enough.
 - `$ea-execute` is the TC-first execution surface after an approved ea-planning handoff and before `$ea-qa`.

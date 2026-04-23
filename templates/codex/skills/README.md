@@ -12,7 +12,7 @@ Current active in-session workflow surface:
 - `ea-qa/`
 
 `ea-brainstorming/` is upstream ideation and design shaping.
-`ea-north-star/` locks a fuzzy target into one clear shared goal.
+`ea-north-star/` bootstraps a dedicated worktree, then locks a fuzzy target into one clear shared goal.
 `ea-blueprint/` turns a locked North Star into a buildable design spec.
 `ea-planning/` is downstream execution planning.
 `ea-execute/` is downstream TC-first execution after an approved ea-planning handoff and before `$ea-qa`.
