@@ -179,6 +179,21 @@ Keep the answer cleanly structured.
 - do not mix every detail into one paragraph
 - do not flood the main answer with too many file paths
 
+Output readability is mandatory.
+
+- you MUST optimize for scan speed, not for dumping everything you know
+- you MUST give the conclusion in plain words before support detail
+- you MUST keep the number of file paths low in the main answer
+- you MUST NOT repeat the same file path again and again when one mention is enough
+- you MUST NOT stack many long file paths in one paragraph
+- you MUST summarize the meaning first and mention the file only when it materially helps
+- you MUST prefer short labels such as "the plan", "the decision note", or "the skill" after the first clear mention
+- you MUST use file paths only for key evidence, exact edits, or when the user explicitly asks for the location
+- you MUST collapse path-heavy evidence into a short summary instead of echoing raw path lists
+- you MUST NOT let file references break the reading flow
+- if two issues matter, you MUST name the two issues directly before citing any file
+- if one short paragraph can say it clearly, you MUST NOT turn it into a path-by-path walkthrough
+
 ## Flow Chart Rule
 
 When a process or workflow needs to be explained, prefer a real ASCII flow chart.
