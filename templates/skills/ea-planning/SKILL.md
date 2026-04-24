@@ -33,15 +33,17 @@ Its job is to:
 ## Position In The Main Flow
 
 ```text
-$ea-brainstorming
-  -> direction becomes clear enough
+$ea-north-star
+  -> $ea-milestone
+  -> $ea-brainstorming
+  -> integrated design note accepted
   -> $ea-planning
   -> $ea-execute
   -> $ea-qa
   -> commit
 ```
 
-If the direction is still fuzzy, stop and go back to `$ea-brainstorming`.
+If the code design is still fuzzy, stop and go back to `$ea-brainstorming`.
 
 ## Use When
 
@@ -51,6 +53,7 @@ Use `ea-planning` when:
 - a file-based plan would help
 - the work should move toward implementation
 - scope is clear enough to lock
+- for code milestones, the accepted `ea-brainstorming` integrated design note exists or the user explicitly accepts skipping it
 - the user needs ACs, TCs, and test strategy before coding
 
 ## Do Not Use When
@@ -58,7 +61,8 @@ Use `ea-planning` when:
 Do **not** use `ea-planning` when:
 
 - the user is still choosing between broad directions
-- the request is still mostly idea shaping
+- the request still needs goal lock, milestone split, or design brainstorming
+- the code milestone still needs bounded design brainstorming
 - the user only wants comparison or thought cleanup
 - the user already has an approved plan and wants implementation
 

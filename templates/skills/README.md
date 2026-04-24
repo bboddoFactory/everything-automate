@@ -4,16 +4,18 @@ This directory holds distributable skills for the Codex template.
 
 Current active in-session workflow surface:
 
-- `ea-brainstorming/`
 - `ea-north-star/`
+- `ea-milestone/`
+- `ea-brainstorming/`
 - `ea-blueprint/`
 - `ea-planning/`
 - `ea-execute/`
 - `ea-qa/`
 
-`ea-brainstorming/` is upstream ideation and design shaping.
 `ea-north-star/` bootstraps a dedicated worktree, then locks a fuzzy target into one clear shared goal.
-`ea-blueprint/` turns a locked North Star into a buildable design spec.
+`ea-milestone/` splits a locked goal into ordered output milestones.
+`ea-brainstorming/` turns one chosen code milestone into bounded senior-engineer design brainstorming.
+`ea-blueprint/` remains available for older design-spec flows, but the current code path uses `ea-brainstorming/`.
 `ea-planning/` is downstream execution planning.
 `ea-execute/` is downstream TC-first execution after an approved ea-planning handoff and before `$ea-qa`.
 `ea-qa/` is the final cold-review gate before commit.

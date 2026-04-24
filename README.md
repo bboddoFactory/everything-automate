@@ -22,9 +22,9 @@ The workflow starts in Codex and continues with EA skills.
 Current main workflow:
 
 ```text
-$ea-brainstorming
-  -> $ea-north-star
-  -> $ea-blueprint
+$ea-north-star
+  -> $ea-milestone
+  -> $ea-brainstorming
   -> $ea-planning
   -> $ea-execute
   -> $ea-qa
@@ -193,12 +193,14 @@ EA is ready when:
 
 ## Main Workflow Skills
 
-- `$ea-brainstorming`
-  helps turn a vague idea into a clear direction
 - `$ea-north-star`
   bootstraps a dedicated worktree, then locks a fuzzy target into one clear goal
+- `$ea-milestone`
+  splits a locked goal into one or more ordered code milestones
+- `$ea-brainstorming`
+  turns one chosen code milestone into bounded senior-engineer design brainstorming
 - `$ea-blueprint`
-  turns a locked goal into a buildable design spec
+  remains available for older design-spec flows, but the current code path uses `$ea-brainstorming`
 - `$ea-planning`
   turns a clear request into a plan that `$ea-execute` can use
 - `$ea-execute`
@@ -221,7 +223,7 @@ Current active focus:
 
 - Codex workflow surfaces
 - Codex global setup
-- `M5` ea-execute hardening
+- code-only `ea-brainstorming` redesign
 
 Not current active scope here:
 

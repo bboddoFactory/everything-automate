@@ -8,6 +8,10 @@ Current ea-planning roster:
 - `ea-plan-arch.md`
 - `ea-plan-devil.md`
 
+Current ea-brainstorming agent:
+
+- `ea-senior-engineer.md`
+
 Current ea-execute agents:
 
 - `ea-worker.md`

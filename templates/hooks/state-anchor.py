@@ -157,9 +157,59 @@ def build_blueprint_anchor(markdown: str, stage: str) -> str:
     return "\n".join(parts).strip()
 
 
+def build_brainstorming_anchor(markdown: str, stage: str) -> str:
+    anchor_message = section(markdown, "Anchor Message")
+    source_milestone = section(markdown, "Source Milestone")
+    boundary = section(markdown, "Boundary")
+    codebase_context = section(markdown, "Codebase Context")
+    senior_scan = section(markdown, "Senior Engineer Scan")
+    current_design = section(markdown, "Current Design Direction")
+    decisions = section(markdown, "Decisions")
+    open_questions = section(markdown, "Open Questions")
+    parking_lot = section(markdown, "Parking Lot")
+    planning_handoff = section(markdown, "Planning Handoff")
+
+    parts = [
+        "Brainstorming mode is active.",
+        f"Stage: {stage}.",
+    ]
+    if anchor_message:
+        parts.extend(["", "Anchor:", anchor_message])
+    if source_milestone:
+        parts.extend(["", "Source Milestone:", source_milestone])
+    if boundary:
+        parts.extend(["", "Boundary:", boundary])
+    if codebase_context:
+        parts.extend(["", "Codebase Context:", codebase_context])
+    if senior_scan:
+        parts.extend(["", "Senior Engineer Scan:", senior_scan])
+    if current_design:
+        parts.extend(["", "Current Design Direction:", current_design])
+    if decisions:
+        parts.extend(["", "Decisions:", decisions])
+    if open_questions:
+        parts.extend(["", "Open Questions:", open_questions])
+    if parking_lot:
+        parts.extend(["", "Parking Lot:", parking_lot])
+    if planning_handoff:
+        parts.extend(["", "Planning Handoff:", planning_handoff])
+    parts.extend(
+        [
+            "",
+            "Stay inside the chosen code milestone boundary.",
+            "Classify new ideas as Code Design Material, Learning Question, Decision, Open Question, or Parking Lot before following them.",
+            "Do not implement or write an execution plan in brainstorming mode.",
+            "If the user asks for implementation planning, first make sure the integrated design note is accepted and archived.",
+        ]
+    )
+    return "\n".join(parts).strip()
+
+
 def build_anchor(markdown: str) -> str:
     mode = frontmatter_value(markdown, "mode")
     stage = frontmatter_value(markdown, "stage") or "unknown"
+    if mode == "brainstorming":
+        return build_brainstorming_anchor(markdown, stage)
     if mode == "north-star":
         return build_north_star_anchor(markdown, stage)
     if mode == "milestone":

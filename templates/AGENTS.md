@@ -12,9 +12,9 @@ Runtime helpers and state tools exist to support that workflow, not replace it.
 
 ```text
 inside Codex
-  -> $ea-brainstorming
   -> $ea-north-star
-  -> $ea-blueprint
+  -> $ea-milestone
+  -> $ea-brainstorming
   -> $ea-planning
   -> $ea-execute
   -> $ea-qa
@@ -241,8 +241,9 @@ That is only a short chain, not a real flow chart.
 
 Primary in-session workflow surface:
 
-- `$ea-brainstorming`
 - `$ea-north-star`
+- `$ea-milestone`
+- `$ea-brainstorming`
 - `$ea-blueprint`
 - `$ea-planning`
 - `$ea-execute`
@@ -269,6 +270,9 @@ Planning agents:
 - `ea-plan-arch`
 - `ea-plan-devil`
 
+Brainstorming agents:
+- `ea-senior-engineer`
+
 Execute agents:
 - `ea-worker`
 - `ea-advisor`
@@ -283,9 +287,11 @@ Docs agents:
 Current note:
 
 - `bootstrap` installs only the minimum setup surface needed to reach `$ea-setup` and `$ea-doctor`.
-- `$ea-brainstorming` is the idea-shaping surface before ea-planning.
 - `$ea-north-star` is the goal-lock surface when the target is fuzzy and drift risk is high, and it starts by preparing a dedicated worktree for that target.
-- `$ea-blueprint` is the design-spec surface after North Star and before ea-planning.
+- `$ea-milestone` splits a locked goal into ordered output milestones.
+- `$ea-brainstorming` is the bounded code-design brainstorming surface after one code milestone is chosen and before ea-planning.
+- Calling `$ea-brainstorming` on a code milestone uses `ea-senior-engineer` by default for read-only codebase design lenses.
+- `$ea-blueprint` remains available for older design-spec flows, but the current code path uses `$ea-brainstorming`.
 - `$ea-planning` is the execution planning surface after direction is clear enough.
 - `$ea-execute` is the TC-first execution surface after an approved ea-planning handoff and before `$ea-qa`.
 - Calling `$ea-execute` is an explicit request to use the `ea-worker` subagent for implementation work; the main LLM stays the controller.
