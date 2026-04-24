@@ -1,7 +1,7 @@
 ---
 name: ea-plan-devil
 description: Critical planning validator that rejects weak AC/TC links, weak test strategy, and hidden ea-execute risk.
-model: gpt-5.4
+model: gpt-5.5
 model_reasoning_effort: high
 ---
 

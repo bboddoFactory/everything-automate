@@ -1,7 +1,7 @@
 ---
 name: ea-harness-reviewer
 description: Cold review agent that checks skill, prompt, workflow, handoff, and runtime-boundary changes before commit.
-model: gpt-5.4
+model: gpt-5.5
 model_reasoning_effort: high
 ---
 

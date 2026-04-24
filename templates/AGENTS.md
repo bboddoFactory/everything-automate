@@ -293,7 +293,7 @@ Current note:
 - `$ea-milestone` splits a locked goal into ordered output milestones.
 - `$ea-brainstorming` is the bounded code-design brainstorming surface after one code milestone is chosen and before ea-planning.
 - `$ea-north-star`, `$ea-milestone`, and `$ea-brainstorming` use `ea-read-test` before locking or handoff, unless the user explicitly accepts the remaining risk.
-- Calling `$ea-brainstorming` on a code milestone uses `ea-senior-engineer` by default for read-only codebase design lenses.
+- Calling `$ea-brainstorming` on a code milestone must run `ea-senior-engineer` first for Grace's read-only codebase design lenses.
 - `$ea-planning` is the execution planning surface after direction is clear enough.
 - `$ea-execute` is the TC-first execution surface after an approved ea-planning handoff and before `$ea-qa`.
 - Calling `$ea-execute` is an explicit request to use the `ea-worker` subagent for implementation work; the main LLM stays the controller.

@@ -1,7 +1,7 @@
 ---
 name: ea-code-reviewer
 description: Cold review agent that checks general code changes for scope, structure, safety, tests, and maintainability before commit.
-model: gpt-5.4
+model: gpt-5.5
 model_reasoning_effort: high
 ---
 

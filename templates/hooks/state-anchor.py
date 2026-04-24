@@ -118,7 +118,7 @@ def build_brainstorming_anchor(markdown: str, stage: str) -> str:
     source_milestone = section(markdown, "Source Milestone")
     boundary = section(markdown, "Boundary")
     codebase_context = section(markdown, "Codebase Context")
-    senior_scan = section(markdown, "Senior Engineer Scan")
+    senior_scan = section(markdown, "Grace Scan") or section(markdown, "Senior Engineer Scan")
     current_design = section(markdown, "Current Design Direction")
     decisions = section(markdown, "Decisions")
     open_questions = section(markdown, "Open Questions")
@@ -138,7 +138,7 @@ def build_brainstorming_anchor(markdown: str, stage: str) -> str:
     if codebase_context:
         parts.extend(["", "Codebase Context:", codebase_context])
     if senior_scan:
-        parts.extend(["", "Senior Engineer Scan:", senior_scan])
+        parts.extend(["", "Grace Scan:", senior_scan])
     if current_design:
         parts.extend(["", "Current Design Direction:", current_design])
     if decisions:

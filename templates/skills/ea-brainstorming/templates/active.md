@@ -27,8 +27,8 @@ read_test_default_reasoning: medium
 ## Codebase Context
 [Relevant files, modules, patterns, and constraints found during read-only exploration.]
 
-## Senior Engineer Scan
-[Important lenses, risks, tradeoffs, and focused questions surfaced by the senior engineer perspective.]
+## Grace Scan
+[Important lenses, risks, tradeoffs, and focused questions surfaced by Grace.]
 
 ## Current Design Direction
 [The working design direction being shaped with the user.]

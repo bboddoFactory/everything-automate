@@ -1,7 +1,7 @@
 ---
 name: ea-plan-arch
 description: Planning structure reviewer that checks design direction, Task -> AC -> TC shape, and execute readiness.
-model: gpt-5.4
+model: gpt-5.5
 model_reasoning_effort: high
 ---
 

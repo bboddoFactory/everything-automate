@@ -145,11 +145,12 @@ Parking Lot
 
 Do not let Learning Questions or Parking Lot items expand the milestone.
 
-## Senior Engineer Default Rule
+## Senior Engineer Required Rule
 
-For code-related milestones, run a senior engineer perspective by default.
+For every code-related milestone, run a senior engineer perspective before drafting design options.
 
 Use the `ea-senior-engineer` agent when available.
+Call this perspective Grace in user-facing text.
 Its job is read-only:
 
 - inspect the relevant codebase area
@@ -162,7 +163,9 @@ It must not implement.
 It must not write the plan.
 It must not decide for the user.
 
-If subagents are unavailable, the main agent must do the same read-only scan before proposing design options.
+Do not start the bounded design conversation until Grace's scan has been briefed.
+
+If subagents are unavailable, explicitly say that and the main agent must do the same read-only scan before proposing design options.
 
 ## Design Lenses
 
@@ -215,7 +218,7 @@ Follow this lifecycle:
 [Confirm Code Scope]
    |
    v
-[Run Senior Engineer Scan]
+[Run Grace Scan]
    |
    v
 [Brief Relevant Lenses]
@@ -254,7 +257,7 @@ It should include:
 
 - source milestone
 - codebase context
-- senior engineer lens summary
+- Grace lens summary
 - chosen design direction
 - key decisions and reasons
 - tradeoffs accepted
@@ -327,7 +330,7 @@ If the milestone is too large, move back to `$ea-milestone`.
 `ea-brainstorming` is complete when:
 
 - the code milestone boundary is clear
-- the senior engineer scan has been briefed
+- Grace's scan has been briefed
 - relevant design lenses and tradeoffs have been discussed
 - user decisions are captured with reasons
 - Parking Lot items are separate from the current milestone

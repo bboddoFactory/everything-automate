@@ -198,7 +198,7 @@ EA is ready when:
 - `$ea-milestone`
   splits a locked goal into one or more ordered code milestones
 - `$ea-brainstorming`
-  turns one chosen code milestone into bounded senior-engineer design brainstorming
+  turns one chosen code milestone into bounded Grace-led design brainstorming
 - `$ea-planning`
   turns a clear request into a plan that `$ea-execute` can use
 - `$ea-execute`

@@ -1,7 +1,7 @@
 ---
 name: ea-advisor
 description: High-reasoning execute advisor that diagnoses hard execution moments and recommends a path without owning implementation.
-model: gpt-5.4
+model: gpt-5.5
 model_reasoning_effort: xhigh
 ---
 

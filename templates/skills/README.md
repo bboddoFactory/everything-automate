@@ -13,7 +13,7 @@ Current active in-session workflow surface:
 
 `ea-north-star/` bootstraps a dedicated worktree, then locks a fuzzy target into one clear shared goal.
 `ea-milestone/` splits a locked goal into ordered output milestones.
-`ea-brainstorming/` turns one chosen code milestone into bounded senior-engineer design brainstorming.
+`ea-brainstorming/` turns one chosen code milestone into bounded Grace-led design brainstorming.
 `ea-planning/` is downstream execution planning.
 `ea-execute/` is downstream TC-first execution after an approved ea-planning handoff and before `$ea-qa`.
 `ea-qa/` is the final cold-review gate before commit.
