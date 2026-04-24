@@ -41,5 +41,5 @@ Installed helper scripts live under the skill that uses them.
 
 Workflow hooks live under:
 
-- `templates/codex/hooks.json`
-- `templates/codex/hooks/`
+- `templates/hooks.json`
+- `templates/hooks/`

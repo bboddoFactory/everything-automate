@@ -26,15 +26,15 @@ Doctor only checks readiness.
 
 - top-level `AGENTS.md`
 - in-session workflow guidance
-- agent prompts under `templates/codex/agents/`
-- workflow skills under `templates/codex/skills/`
-- bootstrap setup skills under `templates/codex/skills/ea-setup/` and `templates/codex/skills/ea-doctor/`
-- workflow prompt hooks under `templates/codex/hooks.json` and `templates/codex/hooks/`
+- agent prompts under `templates/agents/`
+- workflow skills under `templates/skills/`
+- bootstrap setup skills under `templates/skills/ea-setup/` and `templates/skills/ea-doctor/`
+- workflow prompt hooks under `templates/hooks.json` and `templates/hooks/`
 - global installer: `scripts/install_global.py`
 - bootstrap wrapper: `scripts/bootstrap.py`
 - runtime state tool: `runtime/ea_state.py`
 - Codex runtime helper: `runtime/ea_codex.py`
-- authoring-time wrapper: `templates/codex/overlays/ea-codex.sh`
+- authoring-time wrapper: `templates/overlays/ea-codex.sh`
 
 ## Bootstrap
 
@@ -93,7 +93,7 @@ For local testing inside this repository:
 
 1. install project-local skills and agents into `./.codex/`
 2. keep the root `AGENTS.md` as the authoring contract
-3. treat `templates/codex/AGENTS.md` as the runtime guidance reference for the test
+3. treat `templates/AGENTS.md` as the runtime guidance reference for the test
 4. run a ea-planning-only Codex session that writes a plan artifact to `.everything-automate/plans/`
 
 Current helper scripts:
@@ -114,7 +114,7 @@ Internal support tools currently present in the authoring repo:
 
 ```bash
 python3 runtime/ea_codex.py ...
-templates/codex/overlays/ea-codex.sh ...
+templates/overlays/ea-codex.sh ...
 ```
 
 The wrapper stays in the source repo as authoring-time glue.

@@ -97,7 +97,7 @@ def codex_config_path(spec: ProviderSpec) -> Path:
 def build_codex_spec(codex_home: Path) -> ProviderSpec:
     return ProviderSpec(
         name="codex",
-        template_root=ROOT / "templates" / "codex",
+        template_root=ROOT / "templates",
         install_root=codex_home,
         backup_root=codex_home / "backups" / now_utc(),
         manifest_path=codex_home / "everything-automate" / "install-manifest.json",

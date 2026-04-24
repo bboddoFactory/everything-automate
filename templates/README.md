@@ -1,16 +1,19 @@
 # Everything Automate Templates
 
-This directory is the source of truth for distributable runtime assets.
+This directory is the source of truth for distributable Codex runtime assets.
 
 These templates are not the local authoring contract for this repository.
 The local authoring contract lives in the root `AGENTS.md`.
 
-Each provider template should own:
+The active flat runtime shape is:
 
-- the top-level runtime entry file
-- the install/setup guide
-- provider-facing bootstrap assets
-- provider-facing skills, hooks, overlays, or adapters
+- `templates/AGENTS.md`
+- `templates/INSTALL.md`
+- `templates/agents/`
+- `templates/skills/`
+- `templates/hooks.json`
+- `templates/hooks/`
+- `templates/overlays/`
 
 Shared design contracts still live under `docs/specs/`.
-Templates translate those shared contracts into provider-specific entry surfaces.
+This directory now reflects the Codex-only runtime source of truth.

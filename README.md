@@ -7,7 +7,7 @@ scope:
   - first-time setup
   - codex workflow
 covers:
-  - templates/codex/
+  - templates/
   - scripts/
   - docs/
 ---
@@ -256,7 +256,7 @@ The install direction is:
   current milestone map
 - [docs/specs/everything-automate-codex-ea-execute-hardening.md](docs/specs/everything-automate-codex-ea-execute-hardening.md)
   current `M5` working document
-- [templates/codex/INSTALL.md](templates/codex/INSTALL.md)
+- [templates/INSTALL.md](templates/INSTALL.md)
   current Codex install shape
 
 ## Language Rule

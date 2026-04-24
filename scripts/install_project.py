@@ -68,7 +68,7 @@ def build_spec(project_root: Path) -> ProjectSpec:
 
     return ProjectSpec(
         project_root=project_root,
-        template_root=ROOT / "templates" / "codex",
+        template_root=ROOT / "templates",
         codex_root=codex_root,
         agents_root=codex_root / "agents",
         skills_root=codex_root / "skills",
@@ -439,7 +439,7 @@ def run_doctor(spec: ProjectSpec) -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Install everything-automate templates into a project root."
+        description="Install the flat Codex Everything Automate runtime into a project root."
     )
     parser.add_argument(
         "command",
@@ -450,7 +450,7 @@ def parse_args() -> argparse.Namespace:
         "--provider",
         default="codex",
         choices=("codex",),
-        help="Provider adapter/spec to materialize.",
+        help="Compatibility flag; only codex is supported.",
     )
     parser.add_argument(
         "--project-root",

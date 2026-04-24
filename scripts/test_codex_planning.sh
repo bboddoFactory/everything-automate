@@ -14,7 +14,7 @@ python3 "$ROOT/scripts/install_codex_local_test.py" >/dev/null
 cat >"$PROMPT_PATH" <<EOF
 Use the project-local skills installed under ./.codex/skills and the project-local agents installed under ./.codex/agents.
 
-For this test, treat ./templates/codex/AGENTS.md as the runtime guidance reference.
+For this test, treat ./templates/AGENTS.md as the runtime guidance reference.
 
 Invoke \$ea-planning for this repository and create an execution-ready plan artifact at:
 $PLAN_PATH

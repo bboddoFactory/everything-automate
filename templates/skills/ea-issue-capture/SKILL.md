@@ -1,6 +1,6 @@
 ---
 name: ea-issue-capture
-description: Capture an Everything Automate improvement idea from another project session and create a backlog GitHub issue in yhyuntak/everything-automate.
+description: Capture an Everything Automate improvement idea from another project session and create a backlog GitHub issue in bboddoFactory/everything-automate.
 argument-hint: "<EA improvement idea, pain point, missing feature, or raw context>"
 ---
 
@@ -16,7 +16,7 @@ Its job is to:
 
 - capture an EA improvement idea without moving the whole session
 - reshape rough context into a short GitHub issue
-- create the issue in `yhyuntak/everything-automate`
+- create the issue in `bboddoFactory/everything-automate`
 - add the `backlog` label
 - return the created issue link
 
@@ -43,7 +43,7 @@ If the idea should be handled now inside the EA repo, go there and use the norma
 
 Use this fixed target in v1:
 
-- repo: `yhyuntak/everything-automate`
+- repo: `bboddoFactory/everything-automate`
 - label: `backlog`
 
 Do not add extra labels in v1 unless the user explicitly asks for them.
@@ -111,7 +111,7 @@ notice EA improvement idea
   -> restate the problem shortly
   -> shape issue title
   -> fill issue template
-  -> create GitHub issue in yhyuntak/everything-automate
+  -> create GitHub issue in bboddoFactory/everything-automate
   -> add backlog label
   -> return issue number and URL
 ```

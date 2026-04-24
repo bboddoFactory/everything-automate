@@ -251,9 +251,9 @@ Primary in-session workflow surface:
 Current internal support surface in this source repo:
 
 - `runtime/ea_codex.py`
-- `templates/codex/overlays/ea-codex.sh`
-- `templates/codex/skills/ea-setup/`
-- `templates/codex/skills/ea-doctor/`
+- `templates/overlays/ea-codex.sh`
+- `templates/skills/ea-setup/`
+- `templates/skills/ea-doctor/`
 
 These helpers are not the intended primary user workflow.
 `ea-codex.sh` is an authoring-time wrapper around `runtime/ea_codex.py`.

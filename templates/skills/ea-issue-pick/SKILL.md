@@ -1,6 +1,6 @@
 ---
 name: ea-issue-pick
-description: Show open backlog issues from yhyuntak/everything-automate, let the user pick one, and turn it into a ea-brainstorming-ready note.
+description: Show open backlog issues from bboddoFactory/everything-automate, let the user pick one, and turn it into a ea-brainstorming-ready note.
 argument-hint: "[optional issue number, backlog request, or pick-one request]"
 ---
 
@@ -14,7 +14,7 @@ Use this in the EA repo when the user wants to start from a backlog GitHub issue
 
 Its job is to:
 
-- read open backlog issues from `yhyuntak/everything-automate`
+- read open backlog issues from `bboddoFactory/everything-automate`
 - show a short shortlist to the user
 - let the user pick one issue
 - read the chosen issue body and comments
@@ -42,7 +42,7 @@ If the user wants ea-planning or implementation directly, use the normal workflo
 
 Use this fixed target in v1:
 
-- repo: `yhyuntak/everything-automate`
+- repo: `bboddoFactory/everything-automate`
 - state: `open`
 - label: `backlog`
 

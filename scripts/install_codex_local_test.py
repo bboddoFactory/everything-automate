@@ -16,7 +16,7 @@ from install_common import (
 )
 
 
-TEMPLATE_ROOT = ROOT / "templates" / "codex"
+TEMPLATE_ROOT = ROOT / "templates"
 TARGET_CODEX_ROOT = ROOT / ".codex"
 TARGET_SKILLS_DIR = TARGET_CODEX_ROOT / "skills"
 TARGET_AGENTS_DIR = TARGET_CODEX_ROOT / "agents"
