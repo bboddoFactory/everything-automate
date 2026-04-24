@@ -6,6 +6,7 @@ Design forces:
 - Keep one clear source of truth for state.
 - Make role boundaries and handoffs explicit.
 - Treat routing, gates, and lifecycle as first-class design choices.
+- Keep user approval visible at risky workflow turns.
 
 Risk hints:
 - Mode confusion or mixed responsibilities.

@@ -14,7 +14,8 @@ source_north_star_mode: north-star
 source_north_star_stage: locked
 read_test_required: true
 read_test_agents: 3
-design_review_required: true
+design_review_required: false
+design_review_mode: advisory-once
 design_review_agents: 1
 ---
 

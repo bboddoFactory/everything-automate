@@ -67,6 +67,66 @@ Load one matching reference file by default:
 
 Only load extra reference files when the primary reference is not enough.
 
+Before drafting, briefly tell the user:
+
+- the target kind you chose
+- the reference file you loaded
+- the interaction style you will use for that kind
+
+Then ask whether to continue, correct the classification, or stop.
+
+## Required Lifecycle
+
+Follow this lifecycle:
+
+```text
+[Read Source Goal Or Milestone]
+   |
+   v
+[Classify Target Kind]
+   |
+   v
+[Load One Matching Reference]
+   |
+   v
+[Brief User And Ask]
+   |
+   v
+[Draft Blueprint]
+   |
+   v
+[Brief Draft In Plain Language]
+   |
+   v
+[Type-Specific User Refinement]
+   |
+   v
+[Read-Test]
+   |
+   +---- fail ----> [Show Problem, Risk, Smallest Fix]
+   |                    |
+   |                    v
+   |               [Ask User Direction]
+   |                    |
+   |                    +---- revise ----> [Rerun Read-Test On Whole Blueprint]
+   |                    |
+   |                    +---- stop ------> [Leave Active Blueprint Open]
+   |
+   +---- pass ----> [Optional One-Time Design Review]
+                        |
+                        v
+                   [Record Known Risks]
+                        |
+                        v
+                   [Final Brief And Ask To Accept]
+```
+
+The first draft is not gate-ready by default. Use the loaded reference to brief the user on the important design pressure for that target kind, then ask the narrow question that matters most for the current draft.
+
+If user feedback changes or blurs the target kind, reclassify, load the newly matching reference, brief the user again, and continue from that point.
+
+If the user asks for a design change after read-test passes, treat it as a new refinement and rerun read-test on the whole Blueprint before acceptance.
+
 ## Blueprint Frame
 
 Use this classification frame while drafting:
@@ -78,16 +138,29 @@ Use this classification frame while drafting:
 
 ## Acceptance Gates
 
-Before accepting a blueprint, run two separate gates:
+Before accepting a blueprint, run:
 
-1. `Interpretation Read-Test`
-2. `Design Review`
+1. `Interpretation Read-Test` as the hard gate
+2. `Design Review` as an optional one-time advisory check
 
 `Interpretation Read-Test` is interpretation-only. Use 3 agents to confirm they read the same target, scope, and design shape from the blueprint. Do not ask them to judge design quality.
 
-`Design Review` is design-only. Use 1 `GPT-5.4` agent with `xhigh` reasoning to check the design itself. Do not ask it for TC breakdowns, file order, worker assignment, or test command sequences.
+If read-test fails, summarize the problem, risk, and smallest fix. Ask the user before changing the blueprint. After an approved change, rerun read-test on the whole current blueprint, not only the changed part.
 
-If either gate finds a problem, feed the feedback back into the blueprint and rerun the needed gate before acceptance.
+`Design Review` is design-only and advisory by default. Use 1 `GPT-5.4` agent with `xhigh` reasoning when it is helpful to check the design itself. Do not ask it for TC breakdowns, file order, worker assignment, or test command sequences.
+
+Do not let design review create an endless revision loop. Run it at most once by default, summarize findings as known risks and suggested fixes, then ask the user whether to revise or continue toward planning with the risks recorded.
+
+Read-test pass plus explicit user acceptance is enough to accept the blueprint, even if advisory design review has remaining known risks.
+
+Before any structured choice, brief the user in plain language:
+
+- what was produced or found
+- why it matters
+- the recommended next step
+- what each choice means
+
+Before final acceptance, briefly summarize the final design shape, the main user-controlled stop points, the important non-goals, and what planning receives next.
 
 ## Boundary
 
