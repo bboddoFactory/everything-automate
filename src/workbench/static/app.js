@@ -1,70 +1,678 @@
-const SVG_NS = "http://www.w3.org/2000/svg";
-const DEFAULT_PADDING = 120;
-const MIN_ZOOM = 0.35;
-const MAX_ZOOM = 2.2;
+"use strict";
 
 const state = {
-  graph: null,
   source: "custom",
-  customPath: "",
+  path: "",
+  graph: null,
+  cy: null,
+  mini: null,
   selectedId: null,
   hoveredId: null,
-  loading: false,
-  error: null,
+  hubId: null,
   filters: {
     skill: true,
     agent: true,
   },
-  camera: {
-    scale: 1,
-    tx: 0,
-    ty: 0,
-    autoFit: true,
-    mode: "select",
-  },
-  viewport: {
-    width: 0,
-    height: 0,
-  },
-  world: {
-    originX: 0,
-    originY: 0,
-    width: 0,
-    height: 0,
-    baseWidth: 0,
-    baseHeight: 0,
-    padding: DEFAULT_PADDING,
-  },
-  layoutMap: new Map(),
-  nodeOffsets: {},
-  ui: {
-    sourcesCollapsed: false,
-    inspectorCollapsed: false,
-    sourcesOpen: false,
-    inspectorOpen: false,
-    menuOpen: false,
-    helpOpen: false,
-  },
-  interaction: null,
-  dom: {
-    nodes: new Map(),
-    edges: new Map(),
-    miniNodes: new Map(),
-    miniViewport: null,
-  },
-  suppressedNodeClickId: null,
 };
 
 const els = {};
-let renderQueued = false;
-let resizeObserver = null;
 
 function $(selector) {
   return document.querySelector(selector);
 }
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
+function all(selector) {
+  return Array.from(document.querySelectorAll(selector));
+}
+
+function init() {
+  bindElements();
+  bindEvents();
+  applyUrlState();
+  updateSourceUi();
+  updateFilterLists();
+  updatePreview();
+  if (state.source && (state.source !== "custom" || state.path)) {
+    loadGraph();
+  }
+}
+
+function bindElements() {
+  els.sourcesPanel = $("#sourcesPanel");
+  els.inspectorPanel = $("#inspectorPanel");
+  els.drawerBackdrop = $("#drawerBackdrop");
+  els.graphCanvas = $("#graphCanvas");
+  els.emptyState = $("#emptyState");
+  els.minimap = $("#minimap");
+  els.customPath = $("#customPath");
+  els.sourceName = $("#sourceName");
+  els.sourceSummary = $("#sourceSummary");
+  els.sourceStatus = $("#sourceStatus");
+  els.skillFilter = $("#skillFilter");
+  els.agentFilter = $("#agentFilter");
+  els.skillList = $("#skillList");
+  els.agentList = $("#agentList");
+  els.skillCount = $("#skillCount");
+  els.agentCount = $("#agentCount");
+  els.zoomReadout = $("#zoomReadout");
+  els.inspectorEmpty = $("#inspectorEmpty");
+  els.inspectorCard = $("#inspectorCard");
+  els.selectedIcon = $("#selectedIcon");
+  els.selectedName = $("#selectedName");
+  els.selectedKind = $("#selectedKind");
+  els.selectedId = $("#selectedId");
+  els.detailSelectionId = $("#detailSelectionId");
+  els.detailPath = $("#detailPath");
+  els.detailAliases = $("#detailAliases");
+  els.detailDegree = $("#detailDegree");
+  els.incomingEdges = $("#incomingEdges");
+  els.outgoingEdges = $("#outgoingEdges");
+  els.previewSource = $("#previewSource");
+  els.previewNodes = $("#previewNodes");
+  els.previewEdges = $("#previewEdges");
+}
+
+function bindEvents() {
+  all(".source-tab").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.source = button.dataset.source;
+      updateSourceUi();
+    });
+  });
+
+  $("#loadButton").addEventListener("click", loadGraph);
+  $("#clearButton").addEventListener("click", clearGraph);
+  $("#clearFiltersButton").addEventListener("click", () => {
+    state.filters.skill = false;
+    state.filters.agent = false;
+    syncFilterInputs();
+    renderGraph();
+  });
+  $("#sourcesToggle").addEventListener("click", () => openDrawer("sources"));
+  $("#closeSourcesButton").addEventListener("click", () => closeDrawers());
+  $("#closeInspectorButton").addEventListener("click", () => closeDrawers());
+  $("#drawerBackdrop").addEventListener("click", closeDrawers);
+  $("#fitButton").addEventListener("click", fitGraph);
+  $("#fitCanvasButton").addEventListener("click", fitGraph);
+  $("#layoutButton").addEventListener("click", resetLayout);
+  $("#zoomInButton").addEventListener("click", () => zoomBy(1.18));
+  $("#zoomOutButton").addEventListener("click", () => zoomBy(0.84));
+  $("#selectModeButton").addEventListener("click", () => setMode("select"));
+  $("#panModeButton").addEventListener("click", () => setMode("pan"));
+  $("#helpButton").addEventListener("click", () => togglePopover("helpPopover"));
+  $("#menuButton").addEventListener("click", () => togglePopover("menuPopover"));
+  $("#reloadButton").addEventListener("click", loadGraph);
+  $("#resetButton").addEventListener("click", resetLayout);
+  $("#clearSelectionButton").addEventListener("click", clearSelection);
+
+  all("[data-close-popover]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.closePopover;
+      document.getElementById(id).hidden = true;
+    });
+  });
+
+  els.skillFilter.addEventListener("change", () => {
+    state.filters.skill = els.skillFilter.checked;
+    renderGraph();
+  });
+  els.agentFilter.addEventListener("change", () => {
+    state.filters.agent = els.agentFilter.checked;
+    renderGraph();
+  });
+
+  window.addEventListener("resize", () => {
+    if (state.cy) {
+      state.cy.resize();
+      fitGraph();
+    }
+  });
+}
+
+function applyUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get("source");
+  const path = params.get("path");
+  if (source && ["global", "local", "custom"].includes(source)) {
+    state.source = source;
+  }
+  if (path) {
+    state.path = path;
+    els.customPath.value = path;
+  }
+}
+
+function updateSourceUi() {
+  all(".source-tab").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.source === state.source);
+  });
+  const labels = {
+    global: ["codex_global", "Uses ~/.codex"],
+    local: ["codex_local", "Uses repo-root .codex"],
+    custom: ["custom", "Load a Codex home-like path"],
+  };
+  const [name, summary] = labels[state.source];
+  els.sourceName.textContent = name;
+  els.sourceSummary.textContent = summary;
+  els.customPath.disabled = state.source !== "custom";
+}
+
+function syncFilterInputs() {
+  els.skillFilter.checked = state.filters.skill;
+  els.agentFilter.checked = state.filters.agent;
+}
+
+async function loadGraph() {
+  state.path = els.customPath.value.trim();
+  setStatus("Loading graph...");
+  const params = new URLSearchParams({ source: state.source });
+  if (state.source === "custom") {
+    if (!state.path) {
+      setStatus("Custom source requires a path.", true);
+      return;
+    }
+    params.set("path", state.path);
+  }
+
+  try {
+    const response = await fetch(`/api/graph?${params.toString()}`);
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.message || "Graph load failed");
+    }
+    state.graph = payload;
+    state.selectedId = null;
+    state.hoveredId = null;
+    setStatus(`${sourceLabel()} loaded`);
+    updateUrl(params);
+    updateFilterLists();
+    renderGraph();
+    updateInspector();
+    updatePreview();
+  } catch (error) {
+    clearGraph(false);
+    setStatus(error.message, true);
+  }
+}
+
+function clearGraph(clearStatus = true) {
+  state.graph = null;
+  state.selectedId = null;
+  state.hoveredId = null;
+  destroyGraphs();
+  els.emptyState.hidden = false;
+  updateFilterLists();
+  updateInspector();
+  updatePreview();
+  if (clearStatus) {
+    setStatus("Choose a source and load the graph.");
+  }
+}
+
+function setStatus(message, isError = false) {
+  els.sourceStatus.textContent = message;
+  els.sourceStatus.classList.toggle("is-error", isError);
+}
+
+function updateUrl(params) {
+  const next = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState({}, "", next);
+}
+
+function sourceLabel() {
+  if (!state.graph) return "No source";
+  return state.graph.source.source_id.replaceAll("-", "_");
+}
+
+function visibleNodes() {
+  if (!state.graph) return [];
+  return state.graph.nodes.filter((node) => state.filters[node.surface_type]);
+}
+
+function visibleNodeIds() {
+  return new Set(visibleNodes().map((node) => node.selection_id));
+}
+
+function visibleEdges() {
+  if (!state.graph) return [];
+  const ids = visibleNodeIds();
+  return state.graph.edges.filter(
+    (edge) => ids.has(edge.from_selection_id) && ids.has(edge.to_selection_id),
+  );
+}
+
+function updateFilterLists() {
+  const nodes = state.graph ? state.graph.nodes : [];
+  const skills = nodes.filter((node) => node.surface_type === "skill");
+  const agents = nodes.filter((node) => node.surface_type === "agent");
+  els.skillCount.textContent = `${skills.length} selected`;
+  els.agentCount.textContent = `${agents.length} selected`;
+  els.skillList.innerHTML = skills.map(renderCompactNode).join("");
+  els.agentList.innerHTML = agents.map(renderCompactNode).join("");
+  syncFilterInputs();
+}
+
+function renderCompactNode(node) {
+  return `
+    <div class="compact-item">
+      <span class="compact-name">${escapeHtml(node.name)}</span>
+      <span class="compact-degree">${node.degree}</span>
+    </div>
+  `;
+}
+
+function renderGraph() {
+  if (!state.graph) {
+    clearGraph(false);
+    return;
+  }
+  const nodes = visibleNodes();
+  const edges = visibleEdges();
+  if (!nodes.length) {
+    destroyGraphs();
+    els.emptyState.hidden = false;
+    els.emptyState.querySelector("h2").textContent = "No visible nodes";
+    els.emptyState.querySelector("p").textContent = "Turn on Skills or Agents to show the graph.";
+    updatePreview();
+    return;
+  }
+
+  els.emptyState.hidden = true;
+  const positioned = applyClientLayout(nodes, edges);
+  const hub = positioned.find((node) => node.isHub);
+  state.hubId = hub ? hub.selection_id : null;
+  const elements = [
+    ...positioned.map((node) => ({
+      group: "nodes",
+      data: {
+        id: node.selection_id,
+        label: node.name,
+        kind: node.surface_type,
+        size: node.renderSize,
+        degree: node.degree,
+      },
+      position: { x: node.cx, y: node.cy },
+      classes: node.surface_type,
+    })),
+    ...edges.map((edge, index) => ({
+      group: "edges",
+      data: {
+        id: `edge-${index}-${edge.from_selection_id}-${edge.to_selection_id}`,
+        source: edge.from_selection_id,
+        target: edge.to_selection_id,
+        match: edge.match_text,
+      },
+    })),
+  ];
+
+  destroyGraphs();
+  state.cy = cytoscape({
+    container: els.graphCanvas,
+    elements,
+    wheelSensitivity: 0.18,
+    minZoom: 0.22,
+    maxZoom: 2.4,
+    style: graphStyle(),
+    layout: { name: "preset", fit: false },
+  });
+
+  state.cy.on("select", "node", (event) => {
+    state.selectedId = event.target.id();
+    updateFocusClasses();
+    updateInspector();
+    if (window.innerWidth <= 1220) openDrawer("inspector");
+  });
+  state.cy.on("unselect", "node", () => {
+    state.selectedId = null;
+    updateFocusClasses();
+    updateInspector();
+  });
+  state.cy.on("mouseover", "node", (event) => {
+    state.hoveredId = event.target.id();
+    updateFocusClasses();
+  });
+  state.cy.on("mouseout", "node", () => {
+    state.hoveredId = null;
+    updateFocusClasses();
+  });
+  state.cy.on("zoom pan", updateZoomReadout);
+
+  makeMiniMap(elements);
+  fitGraph();
+  updateFocusClasses();
+  updatePreview();
+}
+
+function graphStyle() {
+  return [
+    {
+      selector: "node",
+      style: {
+        width: "data(size)",
+        height: "data(size)",
+        shape: "ellipse",
+        "background-color": "#e8f8ef",
+        "border-width": 2,
+        "border-color": "#25b96f",
+        label: "data(label)",
+        color: "#111827",
+        "font-size": 14,
+        "font-weight": 700,
+        "text-valign": "bottom",
+        "text-halign": "center",
+        "text-margin-y": 8,
+        "text-outline-width": 4,
+        "text-outline-color": "#fbfcfe",
+        "text-wrap": "wrap",
+        "text-max-width": 110,
+        "overlay-padding": 4,
+      },
+    },
+    {
+      selector: "node.agent",
+      style: {
+        "background-color": "#e7f1ff",
+        "border-color": "#0b72f0",
+      },
+    },
+    {
+      selector: "node:selected",
+      style: {
+        width: (node) => Number(node.data("size")) + 22,
+        height: (node) => Number(node.data("size")) + 22,
+        "border-width": 6,
+        "border-color": "#25b96f",
+        "background-color": "#34c77a",
+        color: "#111827",
+        "font-size": 17,
+      },
+    },
+    {
+      selector: "node.agent:selected",
+      style: {
+        "border-color": "#0b72f0",
+        "background-color": "#57a4ff",
+      },
+    },
+    {
+      selector: "node.dim",
+      style: {
+        opacity: 0.22,
+      },
+    },
+    {
+      selector: "edge",
+      style: {
+        width: 1.6,
+        "curve-style": "bezier",
+        "line-color": "#8b96a8",
+        "target-arrow-color": "#8b96a8",
+        "target-arrow-shape": "triangle",
+        "arrow-scale": 0.8,
+        opacity: 0.74,
+      },
+    },
+    {
+      selector: "edge.active",
+      style: {
+        width: 2.4,
+        "line-color": "#536173",
+        "target-arrow-color": "#536173",
+        opacity: 1,
+      },
+    },
+    {
+      selector: "edge.dim",
+      style: {
+        opacity: 0.08,
+      },
+    },
+  ];
+}
+
+function applyClientLayout(nodes, edges) {
+  const incident = new Map(nodes.map((node) => [node.selection_id, new Set()]));
+  edges.forEach((edge) => {
+    incident.get(edge.from_selection_id)?.add(edge.to_selection_id);
+    incident.get(edge.to_selection_id)?.add(edge.from_selection_id);
+  });
+
+  const sorted = [...nodes].sort((a, b) => {
+    if (b.degree !== a.degree) return b.degree - a.degree;
+    if (a.surface_type !== b.surface_type) {
+      return a.surface_type === "skill" ? -1 : 1;
+    }
+    return a.selection_id.localeCompare(b.selection_id);
+  });
+  const hub = sorted[0];
+  const hubNeighbors = new Set(incident.get(hub.selection_id) || []);
+  const nearSlots = [-150, -35, 80, 165, -95, 25, 120, -220].map(toRadians);
+  const farSlots = [-120, -15, 65, 145, 210, 285, 335].map(toRadians);
+  const result = [];
+  let nearIndex = 0;
+  let farIndex = 0;
+
+  sorted.forEach((node) => {
+    const isHub = node.selection_id === hub.selection_id;
+    const ring = isHub ? 0 : hubNeighbors.has(node.selection_id) ? 1 : 2;
+    const radius = ring === 0 ? 0 : ring === 1 ? 255 : 400;
+    const angle = ring === 0
+      ? 0
+      : ring === 1
+        ? nearSlots[nearIndex++ % nearSlots.length]
+        : farSlots[farIndex++ % farSlots.length];
+    const size = Math.min(92, 48 + node.degree * 9 + (isHub ? 18 : 0));
+    result.push({
+      ...node,
+      isHub,
+      renderSize: size,
+      cx: Math.cos(angle) * radius,
+      cy: Math.sin(angle) * radius,
+    });
+  });
+  return result;
+}
+
+function toRadians(degrees) {
+  return degrees * Math.PI / 180;
+}
+
+function makeMiniMap(elements) {
+  state.mini = cytoscape({
+    container: els.minimap,
+    elements,
+    userZoomingEnabled: false,
+    userPanningEnabled: false,
+    autoungrabify: true,
+    style: [
+      {
+        selector: "node",
+        style: {
+          width: 8,
+          height: 8,
+          "background-color": "#8ca3bd",
+          "border-width": 0,
+        },
+      },
+      {
+        selector: "node.skill",
+        style: { "background-color": "#25b96f" },
+      },
+      {
+        selector: "node.agent",
+        style: { "background-color": "#0b72f0" },
+      },
+      {
+        selector: "edge",
+        style: {
+          width: 1,
+          "line-color": "#b6c1ce",
+          "curve-style": "bezier",
+          "target-arrow-shape": "none",
+        },
+      },
+    ],
+    layout: { name: "preset", fit: true, padding: 16 },
+  });
+}
+
+function destroyGraphs() {
+  if (state.cy) {
+    state.cy.destroy();
+    state.cy = null;
+  }
+  if (state.mini) {
+    state.mini.destroy();
+    state.mini = null;
+  }
+}
+
+function fitGraph() {
+  if (!state.cy) return;
+  state.cy.resize();
+  state.cy.fit(state.cy.elements(), 92);
+  centerFocusNode();
+  updateZoomReadout();
+}
+
+function centerFocusNode() {
+  if (!state.cy) return;
+  const focusId = state.selectedId || state.hubId;
+  if (!focusId) return;
+  const focus = state.cy.getElementById(focusId);
+  if (!focus || focus.empty()) return;
+  const rendered = focus.renderedPosition();
+  const target = {
+    x: els.graphCanvas.clientWidth / 2,
+    y: els.graphCanvas.clientHeight / 2,
+  };
+  const pan = state.cy.pan();
+  state.cy.pan({
+    x: pan.x + (target.x - rendered.x) * 0.72,
+    y: pan.y + (target.y - rendered.y) * 0.72,
+  });
+}
+
+function resetLayout() {
+  if (!state.graph) return;
+  renderGraph();
+}
+
+function zoomBy(factor) {
+  if (!state.cy) return;
+  const next = state.cy.zoom() * factor;
+  state.cy.zoom({
+    level: Math.max(state.cy.minZoom(), Math.min(state.cy.maxZoom(), next)),
+    renderedPosition: {
+      x: els.graphCanvas.clientWidth / 2,
+      y: els.graphCanvas.clientHeight / 2,
+    },
+  });
+  updateZoomReadout();
+}
+
+function updateZoomReadout() {
+  if (!state.cy) {
+    els.zoomReadout.textContent = "100%";
+    return;
+  }
+  els.zoomReadout.textContent = `${Math.round(state.cy.zoom() * 100)}%`;
+}
+
+function setMode(mode) {
+  if (!state.cy) return;
+  const isPan = mode === "pan";
+  state.cy.nodes().grabify();
+  state.cy.userPanningEnabled(true);
+  $("#selectModeButton").classList.toggle("is-active", !isPan);
+  $("#panModeButton").classList.toggle("is-active", isPan);
+  state.cy.autounselectify(isPan);
+}
+
+function updateFocusClasses() {
+  if (!state.cy) return;
+  const focusId = state.hoveredId || state.selectedId;
+  state.cy.elements().removeClass("active dim");
+  if (!focusId) return;
+  const focus = state.cy.getElementById(focusId);
+  const neighborhood = focus.closedNeighborhood();
+  state.cy.elements().not(neighborhood).addClass("dim");
+  neighborhood.addClass("active");
+}
+
+function updateInspector() {
+  if (!state.graph || !state.selectedId) {
+    els.inspectorEmpty.hidden = false;
+    els.inspectorCard.hidden = true;
+    return;
+  }
+  const node = state.graph.nodes.find((item) => item.selection_id === state.selectedId);
+  if (!node) {
+    clearSelection();
+    return;
+  }
+  const incoming = state.graph.edges.filter((edge) => edge.to_selection_id === node.selection_id);
+  const outgoing = state.graph.edges.filter((edge) => edge.from_selection_id === node.selection_id);
+  els.inspectorEmpty.hidden = true;
+  els.inspectorCard.hidden = false;
+  els.selectedIcon.classList.toggle("is-agent", node.surface_type === "agent");
+  els.selectedName.textContent = node.name;
+  els.selectedKind.textContent = node.surface_type;
+  els.selectedId.textContent = node.display_id;
+  els.detailSelectionId.textContent = node.selection_id;
+  els.detailPath.textContent = node.relative_path;
+  els.detailAliases.textContent = node.aliases.length ? node.aliases.join(", ") : "None";
+  els.detailDegree.textContent = String(node.degree);
+  els.incomingEdges.innerHTML = edgeListHtml(incoming, "from_selection_id");
+  els.outgoingEdges.innerHTML = edgeListHtml(outgoing, "to_selection_id");
+}
+
+function edgeListHtml(edges, peerKey) {
+  if (!edges.length) return `<p class="muted">No detected edges.</p>`;
+  return edges.map((edge) => {
+    const peer = state.graph.nodes.find((node) => node.selection_id === edge[peerKey]);
+    return `
+      <button class="edge-line" type="button" data-node-id="${escapeAttr(edge[peerKey])}">
+        <strong>${escapeHtml(peer ? peer.name : edge[peerKey])}</strong>
+        <span>${escapeHtml(edge.match_kind)}: ${escapeHtml(edge.match_text)}</span>
+      </button>
+    `;
+  }).join("");
+}
+
+function clearSelection() {
+  state.selectedId = null;
+  if (state.cy) state.cy.nodes().unselect();
+  updateFocusClasses();
+  updateInspector();
+}
+
+function updatePreview() {
+  const nodes = visibleNodes();
+  const edges = visibleEdges();
+  els.previewSource.textContent = state.graph ? sourceLabel() : "None";
+  els.previewNodes.textContent = String(nodes.length);
+  els.previewEdges.textContent = String(edges.length);
+}
+
+function openDrawer(kind) {
+  if (kind === "sources") {
+    document.body.classList.add("sources-open");
+  }
+  if (kind === "inspector") {
+    document.body.classList.add("inspector-open");
+  }
+  els.drawerBackdrop.hidden = false;
+}
+
+function closeDrawers() {
+  document.body.classList.remove("sources-open", "inspector-open");
+  els.drawerBackdrop.hidden = true;
+}
+
+function togglePopover(id) {
+  const popover = document.getElementById(id);
+  popover.hidden = !popover.hidden;
 }
 
 function escapeHtml(value) {
@@ -73,1377 +681,11 @@ function escapeHtml(value) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replaceAll("'", "&#039;");
 }
 
-function setStatus(text, variant = "") {
-  els.statusChip.textContent = text;
-  els.statusChip.dataset.variant = variant;
+function escapeAttr(value) {
+  return escapeHtml(value).replaceAll("`", "&#096;");
 }
 
-function setVisible(el, visible) {
-  el.hidden = !visible;
-}
-
-function isDesktopLayout() {
-  return !window.matchMedia("(max-width: 1100px)").matches;
-}
-
-function isMobileLayout() {
-  return window.matchMedia("(max-width: 720px)").matches;
-}
-
-function currentSourceUrl() {
-  if (state.source === "custom") {
-    return `/api/graph?source=custom&path=${encodeURIComponent(state.customPath.trim())}`;
-  }
-  return `/api/graph?source=${encodeURIComponent(state.source)}`;
-}
-
-function currentShareUrl() {
-  const url = new URL(window.location.href);
-  url.searchParams.set("source", state.source);
-  if (state.source === "custom" && state.customPath.trim()) {
-    url.searchParams.set("path", state.customPath.trim());
-  } else {
-    url.searchParams.delete("path");
-  }
-  return url.toString();
-}
-
-async function fetchJson(url) {
-  const response = await fetch(url);
-  const payload = await response.json();
-  if (!response.ok) {
-    const error = new Error(payload.message || payload.error || `Request failed: ${response.status}`);
-    error.payload = payload;
-    error.status = response.status;
-    throw error;
-  }
-  return payload;
-}
-
-function renderSourceState(message, variant = "", details = []) {
-  els.sourceState.classList.toggle("is-error", variant === "error");
-  const extra = details.length
-    ? `<ul>${details.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-    : "";
-  els.sourceState.innerHTML = `<p>${escapeHtml(message)}</p>${extra}`;
-}
-
-function queueRender() {
-  if (renderQueued) return;
-  renderQueued = true;
-  window.requestAnimationFrame(() => {
-    renderQueued = false;
-    renderGraph();
-  });
-}
-
-function setSource(source) {
-  state.source = source;
-  document.querySelectorAll(".source-card").forEach((card) => {
-    card.classList.toggle("is-active", card.dataset.source === source);
-  });
-}
-
-function updateFilterState() {
-  state.filters.skill = els.skillFilter.checked;
-  state.filters.agent = els.agentFilter.checked;
-  if (!state.filters.skill && !state.filters.agent) {
-    setStatus("All nodes hidden", "busy");
-  }
-  if (state.selectedId && state.graph && !isNodeVisible(state.selectedId)) {
-    clearSelection("Selected node hidden by filter");
-  }
-  if (state.hoveredId && state.graph && !isNodeVisible(state.hoveredId)) {
-    state.hoveredId = null;
-  }
-  queueRender();
-}
-
-function getNodeBox(node) {
-  const textWeight = Math.min(30, node.name.length * 1.2);
-  const degreeWeight = Math.min(18, node.degree * 2.2);
-  const width = clamp(124 + node.size * 0.2 + textWeight, 124, 184);
-  const height = clamp(52 + degreeWeight + Math.min(12, Math.ceil(node.name.length / 14) * 4), 52, 74);
-  return { width, height };
-}
-
-function getNodeOffset(selectionId) {
-  return state.nodeOffsets[selectionId] || { x: 0, y: 0 };
-}
-
-function getNodeSceneLayout(node) {
-  const offset = getNodeOffset(node.selection_id);
-  const box = getNodeBox(node);
-  const centerX = node.x + offset.x;
-  const centerY = node.y + offset.y;
-  const left = centerX - state.world.originX;
-  const top = centerY - state.world.originY;
-  return {
-    centerX,
-    centerY,
-    left,
-    top,
-    width: box.width,
-    height: box.height,
-    boxLeft: left - box.width / 2,
-    boxTop: top - box.height / 2,
-  };
-}
-
-function recomputeWorldBounds({ resetOrigin = false } = {}) {
-  if (!state.graph || !state.graph.nodes.length) {
-    state.world.originX = 0;
-    state.world.originY = 0;
-    state.world.width = 0;
-    state.world.height = 0;
-    state.world.baseWidth = 0;
-    state.world.baseHeight = 0;
-    state.layoutMap = new Map();
-    return;
-  }
-
-  const padding = state.world.padding || DEFAULT_PADDING;
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  const rawLayouts = [];
-  const layoutMap = new Map();
-
-  for (const node of state.graph.nodes) {
-    const offset = getNodeOffset(node.selection_id);
-    const box = getNodeBox(node);
-    const centerX = node.x + offset.x;
-    const centerY = node.y + offset.y;
-    const left = centerX - box.width / 2;
-    const top = centerY - box.height / 2;
-    const right = centerX + box.width / 2;
-    const bottom = centerY + box.height / 2;
-
-    rawLayouts.push({
-      selectionId: node.selection_id,
-      centerX,
-      centerY,
-      left,
-      top,
-      width: box.width,
-      height: box.height,
-      right,
-      bottom,
-    });
-
-    minX = Math.min(minX, left);
-    minY = Math.min(minY, top);
-    maxX = Math.max(maxX, right);
-    maxY = Math.max(maxY, bottom);
-  }
-
-  if (resetOrigin || !Number.isFinite(state.world.originX) || state.world.baseWidth === 0) {
-    state.world.originX = minX - padding;
-    state.world.originY = minY - padding;
-    state.world.baseWidth = Math.max(1, maxX - minX + padding * 2);
-    state.world.baseHeight = Math.max(1, maxY - minY + padding * 2);
-  }
-
-  state.world.width = Math.max(state.world.baseWidth, maxX - state.world.originX + padding);
-  state.world.height = Math.max(state.world.baseHeight, maxY - state.world.originY + padding);
-  for (const layout of rawLayouts) {
-    layoutMap.set(layout.selectionId, {
-      centerX: layout.centerX,
-      centerY: layout.centerY,
-      sceneCenterX: layout.centerX - state.world.originX,
-      sceneCenterY: layout.centerY - state.world.originY,
-      left: layout.left,
-      top: layout.top,
-      boxLeft: layout.left - state.world.originX,
-      boxTop: layout.top - state.world.originY,
-      width: layout.width,
-      height: layout.height,
-      right: layout.right,
-      bottom: layout.bottom,
-    });
-  }
-  state.layoutMap = layoutMap;
-}
-
-function getVisibleNodes() {
-  if (!state.graph) return [];
-  return state.graph.nodes.filter((node) => isNodeVisible(node.selection_id));
-}
-
-function isNodeVisible(selectionId) {
-  if (!state.graph) return false;
-  const node = state.graph.nodes.find((item) => item.selection_id === selectionId);
-  if (!node) return false;
-  return Boolean(state.filters[node.surface_type]);
-}
-
-function getVisibleEdges() {
-  if (!state.graph) return [];
-  const visible = new Set(getVisibleNodes().map((node) => node.selection_id));
-  return state.graph.edges.filter(
-    (edge) => visible.has(edge.from_selection_id) && visible.has(edge.to_selection_id),
-  );
-}
-
-function getFocusSet(selectionId) {
-  if (!state.graph || !selectionId) return null;
-  const ids = new Set([selectionId]);
-  for (const edge of getVisibleEdges()) {
-    if (edge.from_selection_id === selectionId) {
-      ids.add(edge.to_selection_id);
-    }
-    if (edge.to_selection_id === selectionId) {
-      ids.add(edge.from_selection_id);
-    }
-  }
-  return ids;
-}
-
-function getNodeById(selectionId) {
-  if (!state.graph) return null;
-  return state.graph.nodes.find((node) => node.selection_id === selectionId) || null;
-}
-
-function updateCameraControls() {
-  const modeLabel = state.camera.mode === "pan" ? "Pan" : "Select";
-  els.modeButton.dataset.mode = state.camera.mode;
-  els.modeButton.querySelector(".control-label").textContent = modeLabel;
-  els.modeButton.setAttribute("aria-pressed", String(state.camera.mode === "pan"));
-  els.modeValue.textContent = state.camera.mode === "pan" ? "Pan mode" : "Select mode";
-  els.zoomValue.textContent = `${Math.round(state.camera.scale * 100)}%`;
-  els.graphViewport.dataset.mode = state.camera.mode;
-}
-
-function updateCameraTransform() {
-  els.graphWorld.style.width = `${Math.ceil(state.world.width)}px`;
-  els.graphWorld.style.height = `${Math.ceil(state.world.height)}px`;
-  els.graphWorld.style.transform = `translate(${state.camera.tx}px, ${state.camera.ty}px) scale(${state.camera.scale})`;
-  updateCameraControls();
-}
-
-function fitCameraToNodes(nodes = getVisibleNodes()) {
-  if (!state.graph || !nodes.length) {
-    return;
-  }
-
-  const padding = 72;
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  for (const node of nodes) {
-    const layout = state.layoutMap.get(node.selection_id) || getNodeSceneLayout(node);
-    minX = Math.min(minX, layout.boxLeft);
-    minY = Math.min(minY, layout.boxTop);
-    maxX = Math.max(maxX, layout.boxLeft + layout.width);
-    maxY = Math.max(maxY, layout.boxTop + layout.height);
-  }
-
-  const boundsWidth = Math.max(1, maxX - minX);
-  const boundsHeight = Math.max(1, maxY - minY);
-  const availableWidth = Math.max(1, els.graphViewport.clientWidth - padding * 2);
-  const availableHeight = Math.max(1, els.graphViewport.clientHeight - padding * 2);
-  const scale = clamp(Math.min(availableWidth / boundsWidth, availableHeight / boundsHeight), MIN_ZOOM, MAX_ZOOM);
-  const tx = (els.graphViewport.clientWidth - boundsWidth * scale) / 2 - minX * scale;
-  const ty = (els.graphViewport.clientHeight - boundsHeight * scale) / 2 - minY * scale;
-
-  state.camera.scale = scale;
-  state.camera.tx = tx;
-  state.camera.ty = ty;
-  state.camera.autoFit = true;
-  updateCameraTransform();
-  queueRender();
-}
-
-function setCameraScale(nextScale, anchorX, anchorY) {
-  const scale = clamp(nextScale, MIN_ZOOM, MAX_ZOOM);
-  const worldX = (anchorX - state.camera.tx) / state.camera.scale;
-  const worldY = (anchorY - state.camera.ty) / state.camera.scale;
-  state.camera.scale = scale;
-  state.camera.tx = anchorX - worldX * scale;
-  state.camera.ty = anchorY - worldY * scale;
-  state.camera.autoFit = false;
-  updateCameraTransform();
-  queueRender();
-}
-
-function panCamera(deltaX, deltaY) {
-  state.camera.tx += deltaX;
-  state.camera.ty += deltaY;
-  state.camera.autoFit = false;
-  updateCameraTransform();
-  queueRender();
-}
-
-function resetLayout() {
-  if (!state.graph) {
-    setStatus("Load a graph first", "");
-    return;
-  }
-  state.nodeOffsets = {};
-  recomputeWorldBounds({ resetOrigin: true });
-  state.camera.autoFit = true;
-  fitCameraToNodes(getVisibleNodes().length ? getVisibleNodes() : state.graph.nodes);
-  setStatus("Layout reset", "ready");
-  queueRender();
-}
-
-function zoomIn() {
-  const rect = els.graphViewport.getBoundingClientRect();
-  setCameraScale(state.camera.scale * 1.15, rect.width / 2, rect.height / 2);
-}
-
-function zoomOut() {
-  const rect = els.graphViewport.getBoundingClientRect();
-  setCameraScale(state.camera.scale / 1.15, rect.width / 2, rect.height / 2);
-}
-
-function updateGraphTitle() {
-  if (!state.graph) {
-    els.graphTitle.textContent = "Quiet map view";
-    els.graphMeta.textContent = "No graph loaded";
-    return;
-  }
-
-  const source = state.graph.source;
-  const visibleNodes = getVisibleNodes().length;
-  const visibleEdges = getVisibleEdges().length;
-  const warningCount = state.graph.warnings.length;
-  const filterPieces = [];
-  if (!state.filters.skill) filterPieces.push("skills hidden");
-  if (!state.filters.agent) filterPieces.push("agents hidden");
-  const filterText = filterPieces.length ? ` • ${filterPieces.join(", ")}` : "";
-
-  els.graphTitle.textContent = `${source.source_id} map`;
-  els.graphMeta.textContent = `${visibleNodes} visible nodes, ${visibleEdges} visible edges${warningCount ? ` • ${warningCount} warning${warningCount === 1 ? "" : "s"}` : ""}${filterText}`;
-}
-
-function renderInspector(node) {
-  if (!node) {
-    els.inspectorEmpty.classList.remove("is-hidden");
-    els.inspectorCard.classList.add("is-hidden");
-    return;
-  }
-
-  els.inspectorEmpty.classList.add("is-hidden");
-  els.inspectorCard.classList.remove("is-hidden");
-  els.nodeKind.textContent = node.surface_type;
-  els.nodeKind.dataset.kind = node.surface_type;
-  els.nodeName.textContent = node.name;
-  els.nodePath.textContent = node.display_id;
-  els.nodeIdentity.textContent = node.selection_id;
-  els.nodeRelativePath.textContent = node.relative_path;
-  els.nodeAliases.innerHTML = node.aliases.length
-    ? node.aliases.map((alias) => `<span class="pill">${escapeHtml(alias)}</span>`).join("")
-    : '<span class="muted">None</span>';
-  els.nodeDegree.textContent = String(node.degree);
-
-  const outgoing = [];
-  const incoming = [];
-  const relatedEdges = state.graph.edges.filter(
-    (edge) => edge.from_selection_id === node.selection_id || edge.to_selection_id === node.selection_id,
-  );
-
-  for (const edge of relatedEdges) {
-    const from = getNodeById(edge.from_selection_id);
-    const to = getNodeById(edge.to_selection_id);
-    const visible = from && to && isNodeVisible(from.selection_id) && isNodeVisible(to.selection_id);
-    const isOutgoing = edge.from_selection_id === node.selection_id;
-    const other = isOutgoing ? to : from;
-    const label = isOutgoing ? "Outgoing" : "Incoming";
-    const item = {
-      title: other ? other.name : (isOutgoing ? edge.to_selection_id : edge.from_selection_id),
-      matchText: edge.match_text,
-      evidencePath: edge.evidence_path,
-      matchKind: edge.match_kind,
-      targetId: other ? other.selection_id : null,
-      visible,
-      direction: label,
-    };
-    if (isOutgoing) {
-      outgoing.push(item);
-    } else {
-      incoming.push(item);
-    }
-  }
-
-  els.outgoingList.innerHTML = renderEdgeList(node, outgoing);
-  els.incomingList.innerHTML = renderEdgeList(node, incoming);
-}
-
-function renderEdgeList(node, items) {
-  if (!items.length) {
-    return '<p class="empty-note">No detected edges.</p>';
-  }
-
-  return items
-    .map((item) => {
-      if (item.targetId && item.visible) {
-        return `
-          <button class="connection-item" type="button" data-target="${escapeHtml(item.targetId)}">
-            <span>${escapeHtml(item.direction)} -> ${escapeHtml(item.title)}</span>
-            <strong>${escapeHtml(item.matchText)}</strong>
-            <span>${escapeHtml(item.evidencePath)} • ${escapeHtml(item.matchKind)}</span>
-          </button>
-        `;
-      }
-      return `
-        <div class="connection-item is-muted">
-          <span>${escapeHtml(item.direction)} -> ${escapeHtml(item.title)}</span>
-          <strong>${escapeHtml(item.matchText)}</strong>
-          <span>${escapeHtml(item.evidencePath)} • ${escapeHtml(item.matchKind)}</span>
-        </div>
-      `;
-    })
-    .join("");
-}
-
-function renderMinimap() {
-  if (!state.graph) {
-    els.minimapSvg.innerHTML = "";
-    state.dom.miniNodes.clear();
-    state.dom.miniViewport = null;
-    return;
-  }
-
-  const miniWidth = 220;
-  const miniHeight = 160;
-  const pad = 12;
-  const boundsWidth = Math.max(1, state.world.width);
-  const boundsHeight = Math.max(1, state.world.height);
-  const scale = Math.min((miniWidth - pad * 2) / boundsWidth, (miniHeight - pad * 2) / boundsHeight);
-  const offsetX = (miniWidth - boundsWidth * scale) / 2;
-  const offsetY = (miniHeight - boundsHeight * scale) / 2;
-  const visibleIds = new Set(getVisibleNodes().map((node) => node.selection_id));
-
-  if (!state.dom.miniViewport) {
-    els.minimapSvg.innerHTML = "";
-    for (const node of state.graph.nodes) {
-      const circle = document.createElementNS(SVG_NS, "circle");
-      circle.setAttribute("r", "3.2");
-      circle.classList.add("minimap-node", `is-${node.surface_type}`);
-      circle.dataset.selectionId = node.selection_id;
-      els.minimapSvg.appendChild(circle);
-      state.dom.miniNodes.set(node.selection_id, circle);
-    }
-    const viewportRect = document.createElementNS(SVG_NS, "rect");
-    viewportRect.classList.add("minimap-viewport");
-    viewportRect.setAttribute("rx", "2.5");
-    viewportRect.setAttribute("ry", "2.5");
-    els.minimapSvg.appendChild(viewportRect);
-    state.dom.miniViewport = viewportRect;
-  }
-
-  for (const node of state.graph.nodes) {
-    const circle = state.dom.miniNodes.get(node.selection_id);
-    if (!circle) continue;
-    const layout = state.layoutMap.get(node.selection_id);
-    const visible = visibleIds.has(node.selection_id);
-    circle.hidden = !visible;
-    if (!layout) continue;
-    circle.setAttribute("cx", `${layout.sceneCenterX * scale + offsetX}`);
-    circle.setAttribute("cy", `${layout.sceneCenterY * scale + offsetY}`);
-  }
-
-  const viewportLeft = (-state.camera.tx) / state.camera.scale;
-  const viewportTop = (-state.camera.ty) / state.camera.scale;
-  const viewportWidth = els.graphViewport.clientWidth / state.camera.scale;
-  const viewportHeight = els.graphViewport.clientHeight / state.camera.scale;
-  state.dom.miniViewport.setAttribute("x", `${viewportLeft * scale + offsetX}`);
-  state.dom.miniViewport.setAttribute("y", `${viewportTop * scale + offsetY}`);
-  state.dom.miniViewport.setAttribute("width", `${viewportWidth * scale}`);
-  state.dom.miniViewport.setAttribute("height", `${viewportHeight * scale}`);
-}
-
-function renderGraphDom() {
-  if (!state.graph) {
-    els.nodeLayer.innerHTML = "";
-    els.edgeLayer.innerHTML = "";
-    els.graphEmpty.hidden = false;
-    els.graphEmpty.querySelector("h3").textContent = "No graph yet";
-    els.graphEmpty.querySelector("p").textContent = "Load Global, Local, or Custom to inspect the graph.";
-    els.graphMeta.textContent = "No graph loaded";
-    els.graphWorld.style.width = "0px";
-    els.graphWorld.style.height = "0px";
-    updateCameraTransform();
-    renderInspector(null);
-    renderMinimap();
-    return;
-  }
-
-  recomputeWorldBounds();
-  const visibleNodes = new Set(getVisibleNodes().map((node) => node.selection_id));
-  const focusNodeId = state.hoveredId || state.selectedId;
-  const focusSet = getFocusSet(focusNodeId);
-  const activeEdges = new Set();
-  if (focusNodeId) {
-    for (const edge of getVisibleEdges()) {
-      if (edge.from_selection_id === focusNodeId || edge.to_selection_id === focusNodeId) {
-        activeEdges.add(`${edge.from_selection_id}|${edge.to_selection_id}|${edge.match_text}|${edge.evidence_path}`);
-      }
-    }
-  }
-
-  for (const node of state.graph.nodes) {
-    let nodeEl = state.dom.nodes.get(node.selection_id);
-    if (!nodeEl) {
-      nodeEl = document.createElement("button");
-      nodeEl.type = "button";
-      nodeEl.className = "graph-node";
-      nodeEl.dataset.selectionId = node.selection_id;
-      nodeEl.dataset.surfaceType = node.surface_type;
-      nodeEl.addEventListener("click", () => {
-        if (state.suppressedNodeClickId === node.selection_id) {
-          state.suppressedNodeClickId = null;
-          return;
-        }
-        selectNode(node.selection_id);
-      });
-      nodeEl.addEventListener("pointerenter", () => {
-        if (!isNodeVisible(node.selection_id)) return;
-        setHoverNode(node.selection_id);
-      });
-      nodeEl.addEventListener("pointerleave", () => {
-        if (state.hoveredId === node.selection_id) {
-          clearHover();
-        }
-      });
-      nodeEl.addEventListener("focus", () => {
-        if (isNodeVisible(node.selection_id)) {
-          setHoverNode(node.selection_id);
-        }
-      });
-      nodeEl.addEventListener("blur", () => {
-        if (state.hoveredId === node.selection_id) {
-          clearHover();
-        }
-      });
-      nodeEl.innerHTML = `
-        <div class="node-head">
-          <span class="node-kind" data-kind="${escapeHtml(node.surface_type)}">${escapeHtml(node.surface_type)}</span>
-          <span class="node-degree">${escapeHtml(String(node.degree))}</span>
-        </div>
-        <strong class="node-name">${escapeHtml(node.name)}</strong>
-        <span class="node-path">${escapeHtml(node.display_id)}</span>
-        <span class="node-foot">${escapeHtml(node.relative_path)}</span>
-      `;
-      els.nodeLayer.appendChild(nodeEl);
-      state.dom.nodes.set(node.selection_id, nodeEl);
-    }
-
-    const layout = state.layoutMap.get(node.selection_id);
-    if (!layout) continue;
-    const visible = visibleNodes.has(node.selection_id);
-    const isSelected = state.selectedId === node.selection_id;
-    const isHovered = state.hoveredId === node.selection_id;
-    const isActive = !focusSet || focusSet.has(node.selection_id) || isSelected;
-    nodeEl.hidden = !visible;
-    nodeEl.style.left = `${layout.boxLeft}px`;
-    nodeEl.style.top = `${layout.boxTop}px`;
-    nodeEl.style.width = `${layout.width}px`;
-    nodeEl.style.height = `${layout.height}px`;
-    nodeEl.style.zIndex = `${100 + node.degree + (isSelected ? 50 : 0) + (isHovered ? 25 : 0)}`;
-    nodeEl.className = [
-      "graph-node",
-      `is-${node.surface_type}`,
-      isSelected ? "is-selected" : "",
-      isHovered ? "is-hovered" : "",
-      !isActive && !isSelected ? "is-dim" : "",
-      state.interaction && state.interaction.kind === "node" && state.interaction.nodeId === node.selection_id ? "is-dragging" : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }
-
-  for (const edge of state.graph.edges) {
-    const key = `${edge.from_selection_id}|${edge.to_selection_id}|${edge.match_text}|${edge.evidence_path}`;
-    let edgeEl = state.dom.edges.get(key);
-    if (!edgeEl) {
-      edgeEl = document.createElementNS(SVG_NS, "path");
-      edgeEl.classList.add("edge");
-      edgeEl.dataset.edgeId = key;
-      els.edgeLayer.appendChild(edgeEl);
-      state.dom.edges.set(key, edgeEl);
-    }
-
-    const fromVisible = visibleNodes.has(edge.from_selection_id);
-    const toVisible = visibleNodes.has(edge.to_selection_id);
-    const shouldShow = fromVisible && toVisible;
-    edgeEl.hidden = !shouldShow;
-    if (!shouldShow) continue;
-
-    const fromLayout = state.layoutMap.get(edge.from_selection_id);
-    const toLayout = state.layoutMap.get(edge.to_selection_id);
-    if (!fromLayout || !toLayout) continue;
-
-    const startX = fromLayout.centerX - state.world.originX;
-    const startY = fromLayout.centerY - state.world.originY;
-    const endX = toLayout.centerX - state.world.originX;
-    const endY = toLayout.centerY - state.world.originY;
-    const direction = Math.sign(endX - startX) || 1;
-    const bend = clamp(Math.abs(endX - startX) * 0.28, 24, 92);
-    const path = `M ${startX} ${startY} C ${startX + direction * bend} ${startY}, ${endX - direction * bend} ${endY}, ${endX} ${endY}`;
-    edgeEl.setAttribute("d", path);
-    edgeEl.setAttribute(
-      "class",
-      `edge ${focusNodeId && activeEdges.has(key) ? "is-active" : focusNodeId ? "is-dim" : "is-active"}`,
-    );
-  }
-
-  const visibleCount = visibleNodes.size;
-  if (!visibleCount) {
-    els.graphEmpty.hidden = false;
-    els.graphEmpty.querySelector("h3").textContent = "No visible nodes";
-    els.graphEmpty.querySelector("p").textContent = "Use the filters to show at least one node type.";
-  } else {
-    els.graphEmpty.hidden = true;
-  }
-
-  if (state.selectedId && !isNodeVisible(state.selectedId)) {
-    clearSelection("Selected node hidden by filter");
-  } else if (state.selectedId) {
-    renderInspector(getNodeById(state.selectedId));
-  } else {
-    renderInspector(null);
-  }
-
-  updateGraphTitle();
-  updateCameraTransform();
-  renderMinimap();
-}
-
-function renderGraph() {
-  if (!state.graph) {
-    renderGraphDom();
-    return;
-  }
-  renderGraphDom();
-}
-
-function setHoverNode(selectionId) {
-  if (!selectionId || !isNodeVisible(selectionId)) return;
-  if (state.hoveredId === selectionId) return;
-  state.hoveredId = selectionId;
-  queueRender();
-}
-
-function clearHover() {
-  if (!state.hoveredId) return;
-  state.hoveredId = null;
-  queueRender();
-}
-
-function ensureInspectorOpen() {
-  if (isDesktopLayout()) {
-    state.ui.inspectorCollapsed = false;
-  } else {
-    state.ui.inspectorOpen = true;
-  }
-  syncResponsivePanels();
-}
-
-function selectNode(selectionId, options = {}) {
-  const node = getNodeById(selectionId);
-  if (!node || !isNodeVisible(selectionId)) {
-    clearSelection("Selected node hidden by filter");
-    return;
-  }
-  state.selectedId = selectionId;
-  ensureInspectorOpen();
-  renderInspector(node);
-  queueRender();
-  if (!options.quiet) {
-    setStatus(`Selected ${node.name}`, "selected");
-  }
-}
-
-function clearSelection(message = "Selection cleared") {
-  state.selectedId = null;
-  state.ui.inspectorOpen = false;
-  renderInspector(null);
-  syncResponsivePanels();
-  queueRender();
-  setStatus(message, "");
-}
-
-function setSourceStateForGraph(graph) {
-  const details = [
-    `${graph.source.root_path}`,
-    `${graph.nodes.length} nodes, ${graph.edges.length} edges`,
-  ];
-  if (graph.warnings.length) {
-    details.push(...graph.warnings.slice(0, 4));
-  }
-  renderSourceState(`${graph.source.source_id} loaded`, "ready", details);
-}
-
-async function loadGraph() {
-  closeHelp();
-  closeMenu();
-  if (state.source === "custom") {
-    state.customPath = els.customPath.value.trim();
-    if (!state.customPath) {
-      state.error = { error: "invalid_source", message: "Enter a custom path first." };
-      renderSourceState(state.error.message, "error");
-      setStatus("Custom path needed", "error");
-      return;
-    }
-  }
-
-  setLoading(true);
-  state.error = null;
-  state.selectedId = null;
-  state.hoveredId = null;
-  state.nodeOffsets = {};
-  state.suppressedNodeClickId = null;
-  renderSourceState("Loading graph...", "busy");
-  setStatus("Loading graph...", "busy");
-
-  try {
-    const graph = await fetchJson(currentSourceUrl());
-    state.graph = graph;
-    recomputeWorldBounds({ resetOrigin: true });
-    buildGraphDom();
-    state.camera.autoFit = true;
-    fitCameraToNodes(getVisibleNodes().length ? getVisibleNodes() : state.graph.nodes);
-    setSourceStateForGraph(graph);
-    setStatus(`${graph.source.source_id} loaded`, "ready");
-    updateGraphTitle();
-    renderInspector(null);
-    queueRender();
-  } catch (error) {
-    state.graph = null;
-    state.selectedId = null;
-    state.hoveredId = null;
-    state.error = error.payload || { error: "invalid_source", message: error.message };
-    state.camera.scale = 1;
-    state.camera.tx = 0;
-    state.camera.ty = 0;
-    state.camera.autoFit = true;
-    renderGraphDom();
-    renderSourceState(state.error.message || "Invalid source", "error");
-    setStatus("Invalid source", "error");
-  } finally {
-    setLoading(false);
-  }
-}
-
-function buildGraphDom() {
-  els.nodeLayer.innerHTML = "";
-  els.edgeLayer.innerHTML = "";
-  state.dom.nodes.clear();
-  state.dom.edges.clear();
-  state.dom.miniNodes.clear();
-  state.dom.miniViewport = null;
-
-  if (!state.graph) {
-    renderGraphDom();
-    return;
-  }
-
-  for (const edge of state.graph.edges) {
-    const key = `${edge.from_selection_id}|${edge.to_selection_id}|${edge.match_text}|${edge.evidence_path}`;
-    const edgeEl = document.createElementNS(SVG_NS, "path");
-    edgeEl.classList.add("edge");
-    edgeEl.dataset.edgeId = key;
-    els.edgeLayer.appendChild(edgeEl);
-    state.dom.edges.set(key, edgeEl);
-  }
-
-  for (const node of state.graph.nodes) {
-    const nodeEl = document.createElement("button");
-    nodeEl.type = "button";
-    nodeEl.className = "graph-node";
-    nodeEl.dataset.selectionId = node.selection_id;
-    nodeEl.dataset.surfaceType = node.surface_type;
-    nodeEl.addEventListener("click", () => {
-      if (state.suppressedNodeClickId === node.selection_id) {
-        state.suppressedNodeClickId = null;
-        return;
-      }
-      selectNode(node.selection_id);
-    });
-    nodeEl.addEventListener("pointerenter", () => {
-      if (isNodeVisible(node.selection_id)) {
-        setHoverNode(node.selection_id);
-      }
-    });
-    nodeEl.addEventListener("pointerleave", () => {
-      if (state.hoveredId === node.selection_id) {
-        clearHover();
-      }
-    });
-    nodeEl.addEventListener("focus", () => {
-      if (isNodeVisible(node.selection_id)) {
-        setHoverNode(node.selection_id);
-      }
-    });
-    nodeEl.addEventListener("blur", () => {
-      if (state.hoveredId === node.selection_id) {
-        clearHover();
-      }
-    });
-    nodeEl.innerHTML = `
-      <div class="node-head">
-        <span class="node-kind" data-kind="${escapeHtml(node.surface_type)}">${escapeHtml(node.surface_type)}</span>
-        <span class="node-degree">${escapeHtml(String(node.degree))}</span>
-      </div>
-      <strong class="node-name">${escapeHtml(node.name)}</strong>
-      <span class="node-path">${escapeHtml(node.display_id)}</span>
-      <span class="node-foot">${escapeHtml(node.relative_path)}</span>
-    `;
-    els.nodeLayer.appendChild(nodeEl);
-    state.dom.nodes.set(node.selection_id, nodeEl);
-  }
-
-  if (!state.dom.miniViewport) {
-    els.minimapSvg.innerHTML = "";
-    for (const node of state.graph.nodes) {
-      const circle = document.createElementNS(SVG_NS, "circle");
-      circle.setAttribute("r", "3.2");
-      circle.classList.add("minimap-node", `is-${node.surface_type}`);
-      circle.dataset.selectionId = node.selection_id;
-      els.minimapSvg.appendChild(circle);
-      state.dom.miniNodes.set(node.selection_id, circle);
-    }
-    const viewportRect = document.createElementNS(SVG_NS, "rect");
-    viewportRect.classList.add("minimap-viewport");
-    viewportRect.setAttribute("rx", "2.5");
-    viewportRect.setAttribute("ry", "2.5");
-    els.minimapSvg.appendChild(viewportRect);
-    state.dom.miniViewport = viewportRect;
-  }
-
-  renderGraphDom();
-}
-
-function syncBackdrop() {
-  const open = state.ui.sourcesOpen || state.ui.inspectorOpen || state.ui.menuOpen || state.ui.helpOpen;
-  els.drawerBackdrop.hidden = !open;
-}
-
-function closeHelp() {
-  state.ui.helpOpen = false;
-  setVisible(els.helpPopover, false);
-  syncBackdrop();
-}
-
-function closeMenu() {
-  state.ui.menuOpen = false;
-  setVisible(els.menuPopover, false);
-  syncBackdrop();
-}
-
-function closeSourcesPanel() {
-  if (isDesktopLayout()) {
-    state.ui.sourcesCollapsed = true;
-  } else {
-    state.ui.sourcesOpen = false;
-  }
-  syncResponsivePanels();
-}
-
-function closeInspectorPanel() {
-  if (isDesktopLayout()) {
-    state.ui.inspectorCollapsed = true;
-  } else {
-    state.ui.inspectorOpen = false;
-  }
-  syncResponsivePanels();
-}
-
-function toggleSourcesPanel() {
-  if (isDesktopLayout()) {
-    state.ui.sourcesCollapsed = !state.ui.sourcesCollapsed;
-  } else {
-    state.ui.sourcesOpen = !state.ui.sourcesOpen;
-  }
-  syncResponsivePanels();
-}
-
-function toggleInspectorPanel() {
-  if (isDesktopLayout()) {
-    state.ui.inspectorCollapsed = !state.ui.inspectorCollapsed;
-  } else {
-    state.ui.inspectorOpen = !state.ui.inspectorOpen;
-  }
-  syncResponsivePanels();
-}
-
-function openHelp() {
-  state.ui.helpOpen = true;
-  setVisible(els.helpPopover, true);
-  setVisible(els.menuPopover, false);
-  state.ui.menuOpen = false;
-  syncBackdrop();
-}
-
-function toggleHelp() {
-  if (state.ui.helpOpen) {
-    closeHelp();
-  } else {
-    openHelp();
-  }
-}
-
-function openMenu() {
-  state.ui.menuOpen = true;
-  setVisible(els.menuPopover, true);
-  setVisible(els.helpPopover, false);
-  state.ui.helpOpen = false;
-  syncBackdrop();
-}
-
-function toggleMenu() {
-  if (state.ui.menuOpen) {
-    closeMenu();
-  } else {
-    openMenu();
-  }
-}
-
-async function copySourceUrl() {
-  const url = currentShareUrl();
-  try {
-    await navigator.clipboard.writeText(url);
-    setStatus("Source URL copied", "ready");
-  } catch {
-    setStatus("Copy failed", "error");
-  }
-}
-
-function setLoading(loading) {
-  state.loading = loading;
-  document.body.classList.toggle("is-loading", loading);
-}
-
-function clearGraph() {
-  closeHelp();
-  closeMenu();
-  state.graph = null;
-  state.selectedId = null;
-  state.hoveredId = null;
-  state.nodeOffsets = {};
-  state.error = null;
-  state.interaction = null;
-  state.camera.scale = 1;
-  state.camera.tx = 0;
-  state.camera.ty = 0;
-  state.camera.autoFit = true;
-  updateCameraTransform();
-  els.nodeLayer.innerHTML = "";
-  els.edgeLayer.innerHTML = "";
-  state.dom.nodes.clear();
-  state.dom.edges.clear();
-  state.dom.miniNodes.clear();
-  state.dom.miniViewport = null;
-  renderGraphDom();
-  renderSourceState("Choose a source and load it to draw the graph.");
-  setStatus("Pick a source", "");
-}
-
-async function handleMenuAction(action) {
-  if (action === "reload") {
-    await loadGraph();
-    closeMenu();
-    return;
-  }
-  if (action === "reset-layout") {
-    resetLayout();
-    closeMenu();
-    return;
-  }
-  if (action === "copy-source") {
-    await copySourceUrl();
-    closeMenu();
-    return;
-  }
-  if (action === "clear-selection") {
-    clearSelection();
-    closeMenu();
-  }
-}
-
-function beginInteraction(event) {
-  if (!state.graph) return;
-  if (event.button !== 0) return;
-  const targetNode = event.target.closest?.(".graph-node");
-  const point = getViewportPoint(event);
-
-  if (targetNode && targetNode.dataset.selectionId) {
-    const nodeId = targetNode.dataset.selectionId;
-    const layout = state.layoutMap.get(nodeId);
-    if (!layout) return;
-    state.interaction = {
-      kind: "node",
-      nodeId,
-      pointerId: event.pointerId,
-      startX: point.x,
-      startY: point.y,
-      startOffsetX: getNodeOffset(nodeId).x,
-      startOffsetY: getNodeOffset(nodeId).y,
-      dragged: false,
-    };
-    targetNode.setPointerCapture?.(event.pointerId);
-    event.preventDefault();
-    return;
-  }
-
-  state.interaction = {
-    kind: "pan",
-    pointerId: event.pointerId,
-    startX: point.x,
-    startY: point.y,
-    startTx: state.camera.tx,
-    startTy: state.camera.ty,
-    dragged: false,
-  };
-  els.graphViewport.setPointerCapture?.(event.pointerId);
-}
-
-function getViewportPoint(event) {
-  const rect = els.graphViewport.getBoundingClientRect();
-  return {
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top,
-  };
-}
-
-function updateInteraction(event) {
-  if (!state.interaction || event.pointerId !== state.interaction.pointerId) return;
-  const point = getViewportPoint(event);
-  const dx = point.x - state.interaction.startX;
-  const dy = point.y - state.interaction.startY;
-
-  if (state.interaction.kind === "pan") {
-    if (!state.interaction.dragged && Math.hypot(dx, dy) < 4) {
-      return;
-    }
-    state.interaction.dragged = true;
-    state.camera.tx = state.interaction.startTx + dx;
-    state.camera.ty = state.interaction.startTy + dy;
-    state.camera.autoFit = false;
-    updateCameraTransform();
-    queueRender();
-    return;
-  }
-
-  if (state.interaction.kind === "node") {
-    if (!state.interaction.dragged && Math.hypot(dx, dy) < 4) {
-      return;
-    }
-    state.interaction.dragged = true;
-    const offsetX = state.interaction.startOffsetX + dx / state.camera.scale;
-    const offsetY = state.interaction.startOffsetY + dy / state.camera.scale;
-    state.nodeOffsets[state.interaction.nodeId] = { x: offsetX, y: offsetY };
-    state.camera.autoFit = false;
-    queueRender();
-  }
-}
-
-function endInteraction(event) {
-  if (!state.interaction || event.pointerId !== state.interaction.pointerId) return;
-  const interaction = state.interaction;
-  state.interaction = null;
-
-  if (interaction.kind === "node" && interaction.dragged) {
-    state.suppressedNodeClickId = interaction.nodeId;
-    window.requestAnimationFrame(() => {
-      if (state.suppressedNodeClickId === interaction.nodeId) {
-        state.suppressedNodeClickId = null;
-      }
-    });
-    setStatus("Node repositioned", "ready");
-    queueRender();
-    return;
-  }
-
-  if (interaction.kind === "node" && !interaction.dragged) {
-    selectNode(interaction.nodeId);
-    return;
-  }
-
-  if (interaction.kind === "pan" && !interaction.dragged && state.camera.mode === "select") {
-    clearSelection("Selection cleared");
-  }
-}
-
-function handleWheel(event) {
-  if (!state.graph) return;
-  event.preventDefault();
-  const point = getViewportPoint(event);
-  const direction = event.deltaY > 0 ? -1 : 1;
-  const factor = direction > 0 ? 1.12 : 1 / 1.12;
-  setCameraScale(state.camera.scale * factor, point.x, point.y);
-}
-
-function toggleMode() {
-  state.camera.mode = state.camera.mode === "select" ? "pan" : "select";
-  updateCameraControls();
-  setStatus(state.camera.mode === "pan" ? "Pan mode" : "Select mode", "ready");
-}
-
-function hydrateElements() {
-  els.app = $("#app");
-  els.statusChip = $("#statusChip");
-  els.sourcePanel = $("#sourcePanel");
-  els.inspectorPanel = $("#inspectorPanel");
-  els.graphViewport = $("#graphViewport");
-  els.graphWorld = $("#graphWorld");
-  els.graphEmpty = $("#graphEmpty");
-  els.edgeLayer = $("#edgeLayer");
-  els.nodeLayer = $("#nodeLayer");
-  els.graphTitle = $("#graphTitle");
-  els.graphMeta = $("#graphMeta");
-  els.sourceState = $("#sourceState");
-  els.customPath = $("#customPath");
-  els.loadButton = $("#loadButton");
-  els.clearButton = $("#clearButton");
-  els.skillFilter = $("#skillFilter");
-  els.agentFilter = $("#agentFilter");
-  els.drawerBackdrop = $("#drawerBackdrop");
-  els.inspectorEmpty = $("#inspectorEmpty");
-  els.inspectorCard = $("#inspectorCard");
-  els.nodeKind = $("#nodeKind");
-  els.nodeName = $("#nodeName");
-  els.nodePath = $("#nodePath");
-  els.nodeIdentity = $("#nodeIdentity");
-  els.nodeRelativePath = $("#nodeRelativePath");
-  els.nodeAliases = $("#nodeAliases");
-  els.nodeDegree = $("#nodeDegree");
-  els.outgoingList = $("#outgoingList");
-  els.incomingList = $("#incomingList");
-  els.topbarSourcesButton = $("#topbarSourcesButton");
-  els.layoutButton = $("#layoutButton");
-  els.fitButton = $("#fitButton");
-  els.fitCanvasButton = $("#fitCanvasButton");
-  els.helpButton = $("#helpButton");
-  els.menuButton = $("#menuButton");
-  els.modeButton = $("#modeButton");
-  els.zoomOutButton = $("#zoomOutButton");
-  els.zoomInButton = $("#zoomInButton");
-  els.zoomValue = $("#zoomValue");
-  els.modeValue = $("#modeValue");
-  els.helpPopover = $("#helpPopover");
-  els.menuPopover = $("#menuPopover");
-  els.minimapSvg = $("#minimapSvg");
-}
-
-function bindUi() {
-  document.querySelectorAll(".source-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      setSource(card.dataset.source);
-      if (card.dataset.source !== "custom") {
-        void loadGraph();
-      } else {
-        setStatus("Enter a custom path", "");
-      }
-    });
-  });
-
-  els.topbarSourcesButton.addEventListener("click", toggleSourcesPanel);
-  document.querySelectorAll('[data-action="sources"]').forEach((button) => {
-    button.addEventListener("click", toggleSourcesPanel);
-  });
-  document.querySelectorAll('[data-action="close-sources"]').forEach((button) => {
-    button.addEventListener("click", closeSourcesPanel);
-  });
-
-  document.querySelectorAll('[data-action="inspector"]').forEach((button) => {
-    button.addEventListener("click", toggleInspectorPanel);
-  });
-  document.querySelectorAll('[data-action="close-inspector"]').forEach((button) => {
-    button.addEventListener("click", closeInspectorPanel);
-  });
-
-  els.layoutButton.addEventListener("click", resetLayout);
-  els.fitButton.addEventListener("click", () => fitCameraToNodes(getVisibleNodes().length ? getVisibleNodes() : state.graph?.nodes || []));
-  els.fitCanvasButton.addEventListener("click", () => fitCameraToNodes(getVisibleNodes().length ? getVisibleNodes() : state.graph?.nodes || []));
-  els.helpButton.addEventListener("click", toggleHelp);
-  els.menuButton.addEventListener("click", toggleMenu);
-  els.modeButton.addEventListener("click", toggleMode);
-  els.zoomInButton.addEventListener("click", zoomIn);
-  els.zoomOutButton.addEventListener("click", zoomOut);
-
-  els.loadButton.addEventListener("click", () => {
-    void loadGraph();
-  });
-
-  els.clearButton.addEventListener("click", clearGraph);
-
-  els.skillFilter.addEventListener("change", updateFilterState);
-  els.agentFilter.addEventListener("change", updateFilterState);
-
-  els.customPath.addEventListener("input", () => {
-    state.customPath = els.customPath.value;
-    if (state.source === "custom" && !state.loading) {
-      renderSourceState("Choose a source and load it to draw the graph.");
-    }
-  });
-
-  els.customPath.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      void loadGraph();
-    }
-  });
-
-  els.drawerBackdrop.addEventListener("click", () => {
-    closeHelp();
-    closeMenu();
-    if (isDesktopLayout()) {
-      state.ui.sourcesCollapsed = true;
-      state.ui.inspectorCollapsed = true;
-    } else {
-      state.ui.sourcesOpen = false;
-      state.ui.inspectorOpen = false;
-    }
-    syncResponsivePanels();
-  });
-
-  document.querySelectorAll(".menu-item").forEach((button) => {
-    button.addEventListener("click", () => {
-      void handleMenuAction(button.dataset.menuAction);
-    });
-  });
-
-  document.querySelectorAll('[data-action="close-help"]').forEach((button) => {
-    button.addEventListener("click", closeHelp);
-  });
-  document.querySelectorAll('[data-action="close-menu"]').forEach((button) => {
-    button.addEventListener("click", closeMenu);
-  });
-
-  els.graphViewport.addEventListener("pointerdown", beginInteraction);
-  els.graphViewport.addEventListener("pointermove", updateInteraction);
-  els.graphViewport.addEventListener("pointerup", endInteraction);
-  els.graphViewport.addEventListener("pointercancel", endInteraction);
-  els.graphViewport.addEventListener("mouseleave", () => {
-    if (!state.interaction || state.interaction.kind !== "pan") {
-      clearHover();
-    }
-  });
-  els.graphViewport.addEventListener("wheel", handleWheel, { passive: false });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeHelp();
-      closeMenu();
-      if (isDesktopLayout()) {
-        state.ui.sourcesCollapsed = true;
-        state.ui.inspectorCollapsed = true;
-      } else {
-        state.ui.sourcesOpen = false;
-        state.ui.inspectorOpen = false;
-      }
-      syncResponsivePanels();
-    }
-  });
-
-  window.addEventListener("resize", () => {
-    syncResponsivePanels();
-    if (state.camera.autoFit && state.graph) {
-      fitCameraToNodes(getVisibleNodes().length ? getVisibleNodes() : state.graph.nodes);
-    } else {
-      queueRender();
-    }
-  });
-
-  resizeObserver = new ResizeObserver(() => {
-    if (state.camera.autoFit && state.graph) {
-      fitCameraToNodes(getVisibleNodes().length ? getVisibleNodes() : state.graph.nodes);
-    } else {
-      queueRender();
-    }
-  });
-  resizeObserver.observe(els.graphViewport);
-}
-
-function hydrateFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const source = params.get("source");
-  const path = params.get("path");
-  let shouldAutoLoad = false;
-  if (source) {
-    setSource(source);
-    shouldAutoLoad = true;
-  }
-  if (path) {
-    els.customPath.value = path;
-    state.customPath = path;
-    shouldAutoLoad = true;
-  }
-  return shouldAutoLoad;
-}
-
-function syncResponsivePanels() {
-  const tablet = window.matchMedia("(max-width: 1100px)").matches;
-  const mobile = isMobileLayout();
-
-  document.body.classList.toggle("is-tablet", tablet && !mobile);
-  document.body.classList.toggle("is-mobile", mobile);
-
-  if (!tablet) {
-    document.body.classList.toggle("sources-collapsed", state.ui.sourcesCollapsed);
-    document.body.classList.toggle("inspector-collapsed", state.ui.inspectorCollapsed);
-    els.sourcePanel.classList.remove("is-open");
-    els.inspectorPanel.classList.remove("is-open");
-  } else {
-    document.body.classList.remove("sources-collapsed", "inspector-collapsed");
-    els.sourcePanel.classList.toggle("is-open", state.ui.sourcesOpen);
-    els.inspectorPanel.classList.toggle("is-open", state.ui.inspectorOpen);
-  }
-
-  els.helpPopover.hidden = !state.ui.helpOpen;
-  els.menuPopover.hidden = !state.ui.menuOpen;
-  syncBackdrop();
-}
-
-function syncOverlayPlacement() {
-  if (isDesktopLayout()) {
-    els.inspectorPanel.hidden = Boolean(state.ui.inspectorCollapsed);
-    els.sourcePanel.hidden = Boolean(state.ui.sourcesCollapsed);
-  } else {
-    els.inspectorPanel.hidden = false;
-    els.sourcePanel.hidden = false;
-  }
-}
-
-function updateSourceSummary() {
-  if (!state.graph) {
-    renderSourceState("Choose a source and load it to draw the graph.");
-    return;
-  }
-  setSourceStateForGraph(state.graph);
-}
-
-function refreshDomAfterLayoutChange() {
-  updateCameraTransform();
-  updateGraphTitle();
-  queueRender();
-  syncOverlayPlacement();
-}
-
-async function boot() {
-  hydrateElements();
-  bindUi();
-  const shouldAutoLoad = hydrateFromUrl();
-  syncResponsivePanels();
-  updateCameraControls();
-  renderSourceState("Choose a source and load it to draw the graph.");
-  if (shouldAutoLoad) {
-    await loadGraph();
-  }
-  if (!state.graph) {
-    renderGraphDom();
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  void boot();
-});
+window.addEventListener("DOMContentLoaded", init);
