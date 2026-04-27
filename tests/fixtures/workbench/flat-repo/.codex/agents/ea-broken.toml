@@ -1,0 +1,8 @@
+name = "ea-broken"
+description = "This file is patched to behave like an unreadable surface."
+developer_instructions = """
+# ea-broken
+
+This surface should be skipped when read errors happen.
+"""
+

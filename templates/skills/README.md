@@ -25,6 +25,7 @@ Support skills:
 - `ea-docs/`
 - `ea-issue-capture/`
 - `ea-issue-pick/`
+- `ea-map/`
 - `ea-upstream/`
 
 `ea-setup/` is the setup and repair surface. Bootstrap installs it first.
@@ -32,6 +33,7 @@ Support skills:
 `ea-docs/` sets up, checks, and maintains an LLM Wiki docs structure for project work.
 `ea-issue-capture/` creates a real backlog GitHub issue in `bboddoFactory/everything-automate` from another project session.
 `ea-issue-pick/` reads one open backlog issue and turns it into input for `$ea-brainstorming`.
+`ea-map/` inspects the EA skill and agent graph and routes work to the smallest useful skill path. It can also point to the read-only M2 Workbench, which starts with `python3 -m src.workbench.server --host 127.0.0.1 --port 8765` or the thin launcher `python3 scripts/ea_workbench.py`.
 `ea-upstream/` fixes shared Everything Automate harness issues from a project session.
 
 Installed helper scripts live under the skill that uses them.

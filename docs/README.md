@@ -37,6 +37,12 @@ Those notes can mention older paths, older skill names, or pre-Codex-only design
 
 ## Current Reference Specs
 
+- `docs/workflow-map.md`
+  Visual workflow map and read-only M2.5 graph-first Workbench guide for skills, agents, and flexible entry routes.
+- `docs/workbench-implementation-plan.md`
+  Current M2.5 read-only Workbench plan for `src/workbench/`.
+- `docs/workbench-source-contract.md`
+  M1 source and graph contract for the Codex-first Workbench shape.
 - `docs/specs/everything-automate-operating-principles.md`
   Korean operating principles for writing and maintaining `everything-automate` documents as durable, time-independent sources of truth.
 - `docs/specs/everything-automate-implementation-milestones.md`

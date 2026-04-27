@@ -1,0 +1,8 @@
+name = "ea-bad
+description = "This malformed file should still fall back to the file stem."
+developer_instructions = """
+# ea-bad
+
+This malformed file still needs a sane fallback.
+"""
+

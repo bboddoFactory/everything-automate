@@ -1,0 +1,8 @@
+name = "ea-denied"
+description = "This file is patched to behave like an OSError surface."
+developer_instructions = """
+# ea-denied
+
+This surface should be skipped when OSError happens.
+"""
+

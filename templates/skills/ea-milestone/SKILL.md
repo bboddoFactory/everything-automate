@@ -1,14 +1,14 @@
 ---
 name: ea-milestone
-description: Split a locked North Star into ordered output milestones before code design brainstorming.
-argument-hint: "<locked North Star artifact or milestone roadmap request>"
+description: Split a clear parent goal into ordered output milestones before choosing a current work target.
+argument-hint: "<clear parent goal, locked North Star artifact, or milestone roadmap request>"
 ---
 
 # ea-milestone
 
-Use this after a locked North Star and before `ea-brainstorming`.
+Use this when a clear parent goal is too large to work as one unit.
 
-`ea-milestone` turns one locked final goal into ordered output milestones that later stages can work one by one.
+`ea-milestone` turns one parent goal into ordered output milestones that later stages can work one by one.
 
 ## Purpose
 
@@ -25,6 +25,7 @@ This active file is the source of truth while Milestone mode is active.
 Use this skill when:
 
 - a locked North Star is too large to brainstorm and plan in one step
+- a clear parent goal was provided directly and needs output splitting
 - the goal has clear stage order, dependencies, or required handoffs
 - the user needs output-first milestones before deciding what to design now
 - the next `ea-brainstorming` session should start from one milestone rather than from the whole goal
@@ -35,7 +36,7 @@ If the user did not explicitly ask for Milestone mode, ask before starting when 
 
 Do not use this skill when:
 
-- there is no locked North Star artifact
+- there is no clear parent goal
 - the target is already small enough for a one-item roadmap and the user is ready for `ea-brainstorming`
 - the user wants open-ended idea generation instead of ordered delivery steps
 - the user wants detailed design or implementation planning rather than milestone splitting
@@ -89,16 +90,31 @@ When the milestone roadmap is locked, archive the accepted output to:
 
 Then remove `active.md` from the active path so hooks return to no-op.
 
+## Direct Entry Rule
+
+`ea-milestone` can start without a North Star archive when the user gives a clear enough parent goal.
+
+Do not force `$ea-north-star` just to satisfy a pipeline.
+
+Use a lightweight parent goal when:
+
+- the final outcome is already clear
+- the scope is narrow enough to preserve in one short sentence
+- the main risk is ordering, not target drift
+
+Route back to `$ea-north-star` only when the parent goal itself is fuzzy or drifting.
+
 ## Input Rule
 
-Milestone starts from a locked North Star archive, not from memory alone.
+Milestone starts from a clear parent goal.
 
 Read:
 
-- the locked North Star archive
+- the locked North Star archive when one exists
+- the direct parent goal text when no archive exists
 - any explicit user constraints about order, urgency, scope, or later deliverables
 
-Do not use the chat transcript as the source of truth when it conflicts with the locked North Star artifact.
+Do not use the chat transcript as the source of truth when it conflicts with a locked North Star artifact.
 
 ## Classification Rule
 

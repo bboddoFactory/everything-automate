@@ -289,6 +289,8 @@ Docs agents:
 Current note:
 
 - `bootstrap` installs only the minimum setup surface needed to reach `$ea-setup` and `$ea-doctor`.
+- EA skills are graph nodes, not a forced linear pipeline. Start from the smallest skill that has enough input for the current task.
+- A skill may start directly when its local input contract is satisfied. Route upstream only for the missing input.
 - `$ea-north-star` is the goal-lock surface when the target is fuzzy and drift risk is high, and it starts by preparing a dedicated worktree for that target.
 - `$ea-milestone` splits a locked goal into ordered output milestones.
 - `$ea-brainstorming` is the bounded code-design brainstorming surface after one code milestone is chosen and before ea-planning.
@@ -299,5 +301,5 @@ Current note:
 - Calling `$ea-execute` is an explicit request to use the `ea-worker` subagent for implementation work; the main LLM stays the controller.
 - `$ea-execute` normally continues into `$ea-qa` before `commit` when the work is ready for review.
 - `$ea-qa` is the final review-and-judgment gate before `commit`.
-- support skills such as `ea-docs`, `ea-issue-capture`, `ea-issue-pick`, and `ea-upstream` may feed docs work, backlog work, or upstream harness fixes into the main workflow, but they are not main workflow stages.
+- support skills such as `ea-docs`, `ea-issue-capture`, `ea-issue-pick`, `ea-map`, and `ea-upstream` may feed docs work, backlog work, read-only M2 Workbench inspection, or upstream harness fixes into the main workflow, but they are not main workflow stages.
 - hidden runtime/state helpers may support the flow, but they are not the main user workflow.

@@ -8,7 +8,59 @@ from bisect import bisect_right
 import os
 import shutil
 import re
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 compatibility for the public python3 setup path.
+    try:
+        import tomli as tomllib  # type: ignore[no-redef]
+    except ModuleNotFoundError:
+        class _MinimalTomlDecodeError(ValueError):
+            pass
+
+        class _MinimalToml:
+            TOMLDecodeError = _MinimalTomlDecodeError
+
+            @staticmethod
+            def loads(text: str) -> dict[str, object]:
+                data: dict[str, object] = {}
+                current_table: dict[str, object] | None = None
+                for line_number, raw_line in enumerate(text.splitlines(), start=1):
+                    line = raw_line.split("#", 1)[0].strip()
+                    if not line:
+                        continue
+                    if line.startswith("[") and line.endswith("]"):
+                        table_name = line[1:-1].strip().strip("\"'")
+                        if not table_name:
+                            raise _MinimalTomlDecodeError(f"empty table name at line {line_number}")
+                        table = data.setdefault(table_name, {})
+                        if not isinstance(table, dict):
+                            raise _MinimalTomlDecodeError(f"table conflicts with value at line {line_number}")
+                        current_table = table
+                        continue
+                    if "=" not in line:
+                        raise _MinimalTomlDecodeError(f"expected key/value at line {line_number}")
+                    key, raw_value = line.split("=", 1)
+                    key = key.strip().strip("\"'")
+                    value = raw_value.strip()
+                    if value.lower() == "true":
+                        parsed_value: object = True
+                    elif value.lower() == "false":
+                        parsed_value = False
+                    elif value.isdigit():
+                        parsed_value = int(value)
+                    elif (
+                        len(value) >= 2
+                        and value[0] == value[-1]
+                        and value[0] in {"\"", "'"}
+                    ):
+                        parsed_value = value[1:-1]
+                    else:
+                        raise _MinimalTomlDecodeError(f"unsupported value at line {line_number}")
+                    target = current_table if current_table is not None else data
+                    target[key] = parsed_value
+                return data
+
+        tomllib = _MinimalToml()  # type: ignore[assignment]
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path

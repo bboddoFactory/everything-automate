@@ -1,0 +1,10 @@
+name = "ea-worker"
+description = "The worker reviews the planning note and the plan."
+aliases = ["worker", "execute-worker"]
+developer_instructions = """
+# ea-worker
+
+The worker reviews the planning note and the plan.
+Planning-run and a_plan should not match.
+"""
+

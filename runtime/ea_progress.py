@@ -46,7 +46,7 @@ def progress_location(state_root: Path, task_id: str) -> ProgressLocation:
     return ProgressLocation(
         root=state_root,
         task_dir=task_dir,
-        progress_file=task_dir / "execute-progress.json",
+        progress_file=task_dir / "ea-execute-progress.json",
         terminal_summary_file=task_dir / "terminal-summary.json",
         state_file=task_dir / "loop-state.json",
     )
@@ -211,7 +211,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Manage everything-automate execution progress artifacts.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    init_parser = subparsers.add_parser("init", help="create an execute-progress file")
+    init_parser = subparsers.add_parser("init", help="create an ea-execute-progress file")
     init_parser.add_argument("--state-root", default=DEFAULT_STATE_ROOT)
     init_parser.add_argument("--task-id", required=True)
     init_parser.add_argument("--run-id", required=True)
@@ -220,7 +220,7 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--force", action="store_true")
     init_parser.set_defaults(func=init_progress)
 
-    snapshot_parser = subparsers.add_parser("write-snapshot", help="replace execute-progress.json with a full snapshot from stdin")
+    snapshot_parser = subparsers.add_parser("write-snapshot", help="replace ea-execute-progress.json with a full snapshot from stdin")
     snapshot_parser.add_argument("--state-root", default=DEFAULT_STATE_ROOT)
     snapshot_parser.add_argument("--task-id", required=True)
     snapshot_parser.set_defaults(func=write_snapshot_cmd)

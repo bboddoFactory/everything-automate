@@ -443,7 +443,7 @@ option B
 loop-state.json
   -> run-level state
 
-execute-progress.json
+ea-execute-progress.json
   -> AC-level progress
 
 terminal-summary.json
@@ -475,7 +475,7 @@ partial-progress 예시:
     },
     {
       "ac_id": "AC2",
-      "title": "Define minimum execute-progress schema",
+      "title": "Define minimum ea-execute-progress schema",
       "status": "passed",
       "retry_count": 0
     },
@@ -502,7 +502,7 @@ partial-progress 예시:
 
 현재 판단:
 
-- partial-progress는 `loop-state.json`이 아니라 `execute-progress.json`에 남기는 것이 맞다.
+- partial-progress는 `loop-state.json`이 아니라 `ea-execute-progress.json`에 남기는 것이 맞다.
 - `loop-state.json`은 여전히 큰 stage, terminal reason, resume metadata를 담당한다.
 
 ### Example 9. `complete` Summary
@@ -603,7 +603,7 @@ run-level state
   -> loop-state.json
 
 AC-level progress
-  -> execute-progress.json
+  -> ea-execute-progress.json
 
 final outcome summary
   -> terminal-summary.json
@@ -612,7 +612,7 @@ final outcome summary
 의미:
 
 - `ea_state.py`는 run-level state 전용으로 유지한다.
-- `execute-progress.json`이 `current_ac`, `completed_acs`, `blocked_acs`, `failed_verification_acs`, `latest_evidence`, `best_resume_point`를 담당한다.
+- `ea-execute-progress.json`이 `current_ac`, `completed_acs`, `blocked_acs`, `failed_verification_acs`, `latest_evidence`, `best_resume_point`를 담당한다.
 - `terminal-summary.json`은 final progress snapshot과 final run state를 바탕으로 만들어지는 파생 산출물이다.
 
 ### Runtime Integration Note
@@ -620,7 +620,7 @@ final outcome summary
 현재 구현 상태:
 
 - `runtime/ea_progress.py`가 추가되었다.
-- `runtime/ea_codex.py start`는 `execute-progress.json`을 초기화한다.
+- `runtime/ea_codex.py start`는 `ea-execute-progress.json`을 초기화한다.
 - `runtime/ea_codex.py status`는 progress와 terminal summary를 함께 보여준다.
 - `runtime/ea_codex.py cancel`은 `ea_state.py`로 cancel을 기록한 뒤 `terminal-summary.json`을 쓴다.
 
@@ -629,7 +629,7 @@ final outcome summary
 ```text
 start
   -> loop-state init
-  -> execute-progress init
+  -> ea-execute-progress init
 
 status
   -> handoff + state + progress 확인

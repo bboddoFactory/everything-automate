@@ -32,6 +32,7 @@ Doctor only checks readiness.
 - workflow prompt hooks under `templates/hooks.json` and `templates/hooks/`
 - global installer: `scripts/install_global.py`
 - bootstrap wrapper: `scripts/bootstrap.py`
+- local workbench: `scripts/ea_workbench.py`
 - runtime state tool: `runtime/ea_state.py`
 - Codex runtime helper: `runtime/ea_codex.py`
 - authoring-time wrapper: `templates/overlays/ea-codex.sh`
@@ -126,6 +127,7 @@ After setup, the Codex path should:
 
 - make `$ea-north-star`, `$ea-milestone`, `$ea-brainstorming`, `$ea-planning`, `$ea-execute`, and `$ea-qa` the active code-workflow surfaces
 - install support skills for docs work, GitHub backlog capture and pick-up, and upstream harness fixes
+- install support for inspecting the EA skill and agent graph
 - install the active-state hook that reads `.everything-automate/state/active.md`
 - let approved plans hand off into `$ea-execute` cleanly
 - keep state and recovery underneath the UX
@@ -138,7 +140,7 @@ After setup, the Codex path should:
 
 This is now a partial implementation guide.
 The current runtime helper exists, and the active user-facing Codex code workflow skills right now are `$ea-north-star`, `$ea-milestone`, `$ea-brainstorming`, `$ea-planning`, `$ea-execute`, and `$ea-qa`.
-The current installed support skills right now are `ea-setup`, `ea-doctor`, `ea-docs`, `ea-issue-capture`, `ea-issue-pick`, and `ea-upstream`.
+The current installed support skills right now are `ea-setup`, `ea-doctor`, `ea-docs`, `ea-issue-capture`, `ea-issue-pick`, `ea-map`, and `ea-upstream`.
 The current global setup v0 is:
 
 - `setup`
@@ -155,7 +157,7 @@ The current global setup v0 is:
   - materialize `~/.codex/hooks.json`
   - materialize `~/.codex/hooks/`
   - materialize `~/.codex/agents/*.toml`
-  - materialize `~/.codex/skills/{ea-brainstorming,ea-north-star,ea-milestone,ea-planning,ea-execute,ea-qa,ea-setup,ea-doctor,ea-docs,ea-issue-capture,ea-issue-pick,ea-upstream}/`
+  - materialize `~/.codex/skills/{ea-brainstorming,ea-north-star,ea-milestone,ea-planning,ea-execute,ea-qa,ea-setup,ea-doctor,ea-docs,ea-issue-capture,ea-issue-pick,ea-map,ea-upstream}/`
   - write a managed install manifest under `~/.codex/everything-automate/`
   - back up replaced assets under `~/.codex/backups/<timestamp>/`
 - `doctor`

@@ -45,6 +45,8 @@ $ea-north-star
 
 If the code design is still fuzzy, stop and go back to `$ea-brainstorming`.
 
+This flow is a common path, not a required path.
+
 ## Use When
 
 Use `ea-planning` when:
@@ -53,7 +55,7 @@ Use `ea-planning` when:
 - a file-based plan would help
 - the work should move toward implementation
 - scope is clear enough to lock
-- for code milestones, the accepted `ea-brainstorming` integrated design note exists or the user explicitly accepts skipping it
+- for code work, the design direction is clear enough from an accepted note, direct user input, or repo context
 - the user needs ACs, TCs, and test strategy before coding
 
 ## Do Not Use When
@@ -81,6 +83,25 @@ That usually means:
 - a boundary matters and the repo cannot answer it
 
 Do not keep asking for confirmation in the middle once the plan is clear enough to write.
+
+## Direct Entry Rule
+
+`ea-planning` can start directly when the request is already clear enough.
+
+Do not force `$ea-north-star`, `$ea-milestone`, or `$ea-brainstorming` just to satisfy a pipeline.
+
+Start directly when:
+
+- the task goal is clear
+- scope and non-goals are clear enough
+- the design direction is settled enough to write ACs and TCs
+- repo exploration can answer remaining implementation facts
+
+Route upstream only for the missing input:
+
+- fuzzy goal -> `$ea-north-star`
+- too many outputs or unclear order -> `$ea-milestone`
+- unsettled code design -> `$ea-brainstorming`
 
 ## Core Flow
 

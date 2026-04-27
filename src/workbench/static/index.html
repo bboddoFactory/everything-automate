@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Workbench</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <div class="chrome">
+        <nav class="icon-rail" aria-label="Workbench quick actions">
+          <div class="icon-rail-brand" aria-hidden="true">
+            <span>M2.5</span>
+          </div>
+          <button class="icon-button" type="button" data-action="sources" aria-label="Toggle sources panel" title="Sources">
+            S
+          </button>
+          <button class="icon-button" type="button" data-action="layout" aria-label="Reset graph layout" title="Layout">
+            L
+          </button>
+          <button class="icon-button" type="button" data-action="fit" aria-label="Fit graph to view" title="Fit">
+            F
+          </button>
+          <button class="icon-button" type="button" data-action="inspector" aria-label="Toggle inspector drawer" title="Inspector">
+            I
+          </button>
+          <button class="icon-button" type="button" data-action="help" aria-label="Show help" title="Help">
+            ?
+          </button>
+          <button class="icon-button" type="button" data-action="menu" aria-label="Open menu" title="Menu">
+            ≡
+          </button>
+        </nav>
+
+        <aside class="side-rail source-panel" id="sourcePanel" aria-label="Source and filters">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Source rail</p>
+              <h2>Roots and filters</h2>
+            </div>
+            <button class="ghost-button panel-close" type="button" data-action="close-sources">Close</button>
+          </div>
+
+          <div class="source-grid" role="list" aria-label="Source roots">
+            <button class="source-card" type="button" data-source="global">
+              <span class="source-title">Global</span>
+              <span class="source-body">Uses <code>~/.codex</code></span>
+            </button>
+            <button class="source-card" type="button" data-source="local">
+              <span class="source-title">Local</span>
+              <span class="source-body">Uses repo-root <code>.codex</code></span>
+            </button>
+            <button class="source-card is-active" type="button" data-source="custom">
+              <span class="source-title">Custom</span>
+              <span class="source-body">Load a root path</span>
+            </button>
+          </div>
+
+          <label class="field" for="customPath">
+            <span>Custom path</span>
+            <input id="customPath" type="text" spellcheck="false" aria-describedby="customPathHint">
+            <small id="customPathHint" class="field-hint">Example: /Users/you/.codex</small>
+          </label>
+
+          <div class="field-row">
+            <button class="primary-button" id="loadButton" type="button">Load graph</button>
+            <button class="ghost-button" id="clearButton" type="button">Clear</button>
+          </div>
+
+          <fieldset class="filter-set">
+            <legend>Filters</legend>
+            <label class="filter-option">
+              <input id="skillFilter" type="checkbox" checked>
+              <span>Skills</span>
+            </label>
+            <label class="filter-option">
+              <input id="agentFilter" type="checkbox" checked>
+              <span>Agents</span>
+            </label>
+          </fieldset>
+
+          <div class="source-state" id="sourceState">
+            <p>Choose a source and load it to draw the graph.</p>
+          </div>
+        </aside>
+
+        <main class="workbench">
+          <header class="topbar">
+            <div class="brand">
+              <div class="brand-mark">M2</div>
+              <div>
+                <p class="eyebrow">Graph-first read-only map</p>
+                <h1>Workbench</h1>
+              </div>
+            </div>
+            <div class="topbar-actions">
+              <button class="ghost-button drawer-button" id="topbarSourcesButton" type="button">Sources</button>
+              <button class="ghost-button" id="layoutButton" type="button">Layout</button>
+              <button class="ghost-button" id="fitButton" type="button">Fit</button>
+              <button class="ghost-button" id="helpButton" type="button">Help</button>
+              <button class="ghost-button" id="menuButton" type="button">Menu</button>
+            </div>
+            <div class="status-chip" id="statusChip" aria-live="polite">Pick a source</div>
+          </header>
+
+          <section class="graph-panel">
+            <div class="panel-head graph-head">
+              <div>
+                <p class="eyebrow">Graph canvas</p>
+                <h2 id="graphTitle">Quiet map view</h2>
+              </div>
+              <div class="graph-meta" id="graphMeta">No graph loaded</div>
+            </div>
+
+            <div class="graph-stage" id="graphViewport" tabindex="0" aria-label="Workbench graph canvas" data-testid="graph-viewport">
+              <div class="graph-grid" aria-hidden="true"></div>
+              <div class="graph-empty" id="graphEmpty">
+                <h3>No graph yet</h3>
+                <p>Load Global, Local, or Custom to inspect the graph.</p>
+              </div>
+              <div class="graph-world" id="graphWorld">
+                <svg class="edge-layer" id="edgeLayer" aria-hidden="true"></svg>
+                <div class="node-layer" id="nodeLayer" aria-label="Graph nodes"></div>
+              </div>
+
+              <div class="graph-controls" aria-label="Graph controls">
+                <div class="control-group">
+                  <button class="control-button" id="modeButton" type="button" aria-pressed="true" data-testid="mode-button">
+                    <span class="control-label">Select</span>
+                  </button>
+                  <span class="control-value" id="modeValue">Select mode</span>
+                </div>
+                <button class="control-button" id="zoomOutButton" type="button" aria-label="Zoom out">
+                  −
+                </button>
+                <span class="zoom-value" id="zoomValue" aria-live="polite">100%</span>
+                <button class="control-button" id="zoomInButton" type="button" aria-label="Zoom in">
+                  +
+                </button>
+                <button class="control-button" id="fitCanvasButton" type="button">
+                  Fit
+                </button>
+              </div>
+
+              <div class="minimap" id="minimap" aria-label="Graph overview" data-testid="minimap">
+                <svg id="minimapSvg" viewBox="0 0 220 160" role="img" aria-label="Minimap"></svg>
+              </div>
+
+              <section class="popover help-popover" id="helpPopover" aria-label="Help" hidden>
+                <div class="popover-head">
+                  <strong>Help</strong>
+                  <button class="ghost-button popover-close" type="button" data-action="close-help">Close</button>
+                </div>
+                <p>Drag the empty canvas to pan, use the wheel or zoom buttons to zoom, and click a node to pin it in the inspector.</p>
+                <ul>
+                  <li>Hover a node to highlight one-hop neighbors.</li>
+                  <li>Use Skills and Agents filters to hide node types.</li>
+                  <li>Click Layout to reset session node drag and recenter the graph.</li>
+                </ul>
+              </section>
+
+              <section class="popover menu-popover" id="menuPopover" aria-label="Menu" hidden>
+                <div class="popover-head">
+                  <strong>Menu</strong>
+                  <button class="ghost-button popover-close" type="button" data-action="close-menu">Close</button>
+                </div>
+                <div class="menu-list">
+                  <button class="menu-item" type="button" data-menu-action="reload">Reload source</button>
+                  <button class="menu-item" type="button" data-menu-action="reset-layout">Reset layout</button>
+                  <button class="menu-item" type="button" data-menu-action="copy-source">Copy source URL</button>
+                  <button class="menu-item" type="button" data-menu-action="clear-selection">Clear selection</button>
+                </div>
+              </section>
+            </div>
+          </section>
+        </main>
+
+        <aside class="inspector-panel" id="inspectorPanel" aria-label="Inspector">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Inspector</p>
+              <h2>Node details</h2>
+            </div>
+            <button class="ghost-button panel-close" type="button" data-action="close-inspector">Close</button>
+          </div>
+
+          <section class="inspector-empty" id="inspectorEmpty">
+            <h3>Nothing selected</h3>
+            <p>The inspector shows identity, relative path, aliases, degree, and incoming or outgoing detected edges.</p>
+          </section>
+
+          <section class="inspector-card is-hidden" id="inspectorCard">
+            <div class="node-header">
+              <div>
+                <p class="node-kind" id="nodeKind">skill</p>
+                <h3 id="nodeName"></h3>
+                <p class="node-path" id="nodePath"></p>
+              </div>
+            </div>
+
+            <dl class="node-facts">
+              <div>
+                <dt>Identity</dt>
+                <dd id="nodeIdentity"></dd>
+              </div>
+              <div>
+                <dt>Relative path</dt>
+                <dd id="nodeRelativePath"></dd>
+              </div>
+              <div>
+                <dt>Aliases</dt>
+                <dd id="nodeAliases"></dd>
+              </div>
+              <div>
+                <dt>Degree</dt>
+                <dd id="nodeDegree"></dd>
+              </div>
+            </dl>
+
+            <div class="inspector-section">
+              <h4>Outgoing detected edges</h4>
+              <div class="connection-list" id="outgoingList"></div>
+            </div>
+
+            <div class="inspector-section">
+              <h4>Incoming detected edges</h4>
+              <div class="connection-list" id="incomingList"></div>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+    </div>
+  </body>
+</html>

@@ -1,14 +1,14 @@
 ---
 name: ea-brainstorming
-description: Turn one chosen code milestone into a bounded senior-engineer design conversation before planning.
-argument-hint: "<chosen code milestone or code design brainstorming request>"
+description: Turn one chosen code target into a bounded senior-engineer design conversation before planning.
+argument-hint: "<chosen code milestone, code target, or code design brainstorming request>"
 ---
 
 # ea-brainstorming
 
-Use this after a code-related milestone is chosen and before Planning.
+Use this when one code target needs design thinking before Planning.
 
-`ea-brainstorming` is bounded code-design brainstorming. It helps the user and a senior engineer perspective think through one code milestone before any execution plan is written.
+`ea-brainstorming` is bounded code-design brainstorming. It helps the user and a senior engineer perspective think through one code target before any execution plan is written.
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Use this after a code-related milestone is chosen and before Planning.
 
 Its job is to:
 
-- keep one chosen code milestone as the boundary
+- keep one chosen code target as the boundary
 - inspect the codebase before design choices are treated as settled
 - surface important engineering lenses the user may not know to ask about
 - explain tradeoffs in simple English
@@ -28,7 +28,7 @@ Its job is to:
 
 Use `ea-brainstorming` when:
 
-- there is one chosen code-related milestone
+- there is one chosen code-related milestone or target
 - the next step is design thinking, not execution planning
 - the user wants to understand options and tradeoffs before coding
 - repo context matters and should be read before design choices are made
@@ -40,7 +40,7 @@ If the user did not explicitly ask for `ea-brainstorming`, ask before starting w
 
 Do not use `ea-brainstorming` when:
 
-- there is no locked goal or chosen milestone yet
+- there is no clear code target yet
 - the user is still trying to find the broad goal
 - the target is documentation, harness workflow, or general process work
 - the user already wants a file-based execution plan
@@ -111,16 +111,29 @@ Then remove `.everything-automate/state/active.md` so hooks return to no-op.
 
 ## Input Rule
 
-Start from one chosen code milestone.
+Start from one chosen code target.
 
 Read:
 
-- the chosen milestone artifact or user-provided milestone text
+- the chosen milestone artifact or user-provided code target text
 - the locked parent North Star when it is available
 - relevant codebase files and patterns
 
 Do not reopen the parent goal unless the user explicitly moves back to North Star.
-Do not split milestones inside `ea-brainstorming`; move back to `$ea-milestone` if the milestone is too large.
+Do not split milestones inside `ea-brainstorming`; move back to `$ea-milestone` if the code target is too large.
+
+## Direct Entry Rule
+
+`ea-brainstorming` can start without `$ea-milestone` when the code target is already small and clear.
+
+Use a lightweight boundary when:
+
+- the user names the file, module, feature, bug, or behavior to think through
+- the main open question is design shape
+- the work is small enough to become one planning handoff
+
+Route back to `$ea-milestone` only when the target is too large or contains multiple output milestones.
+Route back to `$ea-north-star` only when the real goal is still unclear.
 
 ## Classification Rule
 

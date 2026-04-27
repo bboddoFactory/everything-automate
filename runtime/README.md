@@ -14,7 +14,7 @@ Current runtime surfaces:
 - `ea_state.py`
   Shared file-based loop state engine
 - `ea_progress.py`
-  Shared progress-artifact helper for `execute-progress.json` and `terminal-summary.json`
+  Shared progress-artifact helper for `ea-execute-progress.json` and `terminal-summary.json`
 - `ea_codex.py`
   Codex runtime helper for `start`, `ralph`, `status`, `cancel`, and `resume`
   that orchestrates state/progress helpers without becoming the source of truth for either

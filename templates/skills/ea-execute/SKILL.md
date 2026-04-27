@@ -56,6 +56,8 @@ Use `ea-execute` when:
 - the user wants implementation now
 - the handoff is strong enough to start real work
 
+For tiny obvious work, the approved plan may be a short local micro-plan created by the controller before the first edit.
+
 ## Do Not Use When
 
 Do **not** use `ea-execute` when:
@@ -72,6 +74,9 @@ If any of the above are true, stop and go back to `$ea-planning`.
 
 `ea-execute` reads an approved plan.
 
+For tiny obvious work, `ea-execute` may use a controller-written micro-plan instead of a full plan artifact.
+This is allowed only when the work is low risk, narrow, and easy to verify.
+
 At minimum, it needs:
 
 - `task_id`
@@ -83,6 +88,16 @@ At minimum, it needs:
 - one `Task`
   - with `AC`s
   - and `TC`s under each `AC`
+
+A micro-plan still needs:
+
+- task goal
+- scope
+- non-goals
+- one AC
+- one TC or fresh check
+
+If those cannot be written quickly, return to `$ea-planning`.
 
 Default `execution_unit` is `AC`.
 

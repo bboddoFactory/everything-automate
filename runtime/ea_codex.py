@@ -34,7 +34,7 @@ def repo_root() -> Path:
 
 
 def default_guidance_file() -> Path:
-    return repo_root() / "templates" / "codex" / "AGENTS.md"
+    return repo_root() / "templates" / "AGENTS.md"
 
 
 def parse_workspace_root(raw: str) -> Path:
@@ -77,7 +77,7 @@ def state_file_for_task(workspace_root: Path, task_id: str) -> Path:
 
 
 def progress_file_for_task(workspace_root: Path, task_id: str) -> Path:
-    return state_root(workspace_root) / "tasks" / task_id / "execute-progress.json"
+    return state_root(workspace_root) / "tasks" / task_id / "ea-execute-progress.json"
 
 
 def terminal_summary_file_for_task(workspace_root: Path, task_id: str) -> Path:
