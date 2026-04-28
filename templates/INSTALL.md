@@ -140,7 +140,7 @@ After setup, the Codex path should:
 
 This is now a partial implementation guide.
 The current runtime helper exists, and the active user-facing Codex code workflow skills right now are `$ea-north-star`, `$ea-milestone`, `$ea-brainstorming`, `$ea-planning`, `$ea-execute`, and `$ea-qa`.
-The current installed support skills right now are `ea-setup`, `ea-doctor`, `ea-docs`, `ea-issue-capture`, `ea-issue-pick`, `ea-map`, and `ea-upstream`.
+The current installed support skills right now are `ea-setup`, `ea-doctor`, `ea-backlog`, `ea-docs`, `ea-feedback-router`, `ea-issue-capture`, `ea-issue-pick`, `ea-map`, and `ea-upstream`.
 The current global setup v0 is:
 
 - `setup`
@@ -157,7 +157,7 @@ The current global setup v0 is:
   - materialize `~/.codex/hooks.json`
   - materialize `~/.codex/hooks/`
   - materialize `~/.codex/agents/*.toml`
-  - materialize `~/.codex/skills/{ea-brainstorming,ea-north-star,ea-milestone,ea-planning,ea-execute,ea-qa,ea-setup,ea-doctor,ea-docs,ea-issue-capture,ea-issue-pick,ea-map,ea-upstream}/`
+  - materialize `~/.codex/skills/{ea-brainstorming,ea-north-star,ea-milestone,ea-planning,ea-execute,ea-qa,ea-setup,ea-doctor,ea-backlog,ea-docs,ea-feedback-router,ea-issue-capture,ea-issue-pick,ea-map,ea-upstream}/`
   - write a managed install manifest under `~/.codex/everything-automate/`
   - back up replaced assets under `~/.codex/backups/<timestamp>/`
 - `doctor`

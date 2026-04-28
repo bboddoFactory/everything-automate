@@ -22,7 +22,9 @@ Support skills:
 
 - `ea-setup/`
 - `ea-doctor/`
+- `ea-backlog/`
 - `ea-docs/`
+- `ea-feedback-router/`
 - `ea-issue-capture/`
 - `ea-issue-pick/`
 - `ea-map/`
@@ -30,7 +32,9 @@ Support skills:
 
 `ea-setup/` is the setup and repair surface. Bootstrap installs it first.
 `ea-doctor/` is the read-only health check surface.
+`ea-backlog/` manages repo-local product, feature, UX, research, and bug follow-up ideas under `.backlog/`.
 `ea-docs/` sets up, checks, and maintains an LLM Wiki docs structure for project work.
+`ea-feedback-router/` classifies user feedback and routes it to the smallest useful next skill or workflow step.
 `ea-issue-capture/` creates a real backlog GitHub issue in `bboddoFactory/everything-automate` from another project session.
 `ea-issue-pick/` reads one open backlog issue and turns it into input for `$ea-brainstorming`.
 `ea-map/` inspects the EA skill and agent graph and routes work to the smallest useful skill path. It can also point to the read-only M2 Workbench, which starts with `python3 -m src.workbench.server --host 127.0.0.1 --port 8765` or the thin launcher `python3 scripts/ea_workbench.py`.

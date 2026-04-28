@@ -212,12 +212,16 @@ Current support skills:
 
 - `ea-setup`
 - `ea-doctor`
+- `ea-backlog`
 - `ea-docs`
+- `ea-feedback-router`
 - `ea-issue-capture`
 - `ea-issue-pick`
 - `ea-map`
 - `ea-upstream`
 
+`ea-backlog` keeps current-repo product, feature, UX, research, and bug follow-up ideas under `.backlog/`.
+`ea-feedback-router` classifies user feedback and points it to the smallest useful next EA route.
 `ea-map` reads the EA skill and agent graph and points to the read-only M2.5 Workbench when a graph view helps.
 
 ## Current Status

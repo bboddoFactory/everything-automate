@@ -301,5 +301,5 @@ Current note:
 - Calling `$ea-execute` is an explicit request to use the `ea-worker` subagent for implementation work; the main LLM stays the controller.
 - `$ea-execute` normally continues into `$ea-qa` before `commit` when the work is ready for review.
 - `$ea-qa` is the final review-and-judgment gate before `commit`.
-- support skills such as `ea-docs`, `ea-issue-capture`, `ea-issue-pick`, `ea-map`, and `ea-upstream` may feed docs work, backlog work, read-only M2 Workbench inspection, or upstream harness fixes into the main workflow, but they are not main workflow stages.
+- support skills such as `ea-backlog`, `ea-docs`, `ea-feedback-router`, `ea-issue-capture`, `ea-issue-pick`, `ea-map`, and `ea-upstream` may feed local backlog work, docs work, feedback routing, upstream issue capture, read-only M2 Workbench inspection, or upstream harness fixes into the main workflow, but they are not main workflow stages.
 - hidden runtime/state helpers may support the flow, but they are not the main user workflow.
