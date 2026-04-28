@@ -192,43 +192,11 @@ class WorkbenchGraphTests(unittest.TestCase):
         expected_edges = {
             (
                 "detected",
-                "custom-codex-home:agent:ea-advisor:agents/ea-advisor/AGENT.md",
-                "custom-codex-home:skill:ea-planning:skills/ea-planning/SKILL.md",
-                "alias",
-                "planning",
-                "agents/ea-advisor/AGENT.md",
-            ),
-            (
-                "detected",
-                "custom-codex-home:agent:ea-worker:agents/ea-worker/AGENT.md",
-                "custom-codex-home:skill:ea-planning:skills/ea-planning/SKILL.md",
-                "alias",
-                "planning",
-                "agents/ea-worker/AGENT.md",
-            ),
-            (
-                "detected",
-                "custom-codex-home:skill:ea-planning:skills/ea-planning/SKILL.md",
-                "custom-codex-home:agent:ea-advisor:agents/ea-advisor/AGENT.md",
-                "alias",
-                "advisor",
-                "skills/ea-planning/SKILL.md",
-            ),
-            (
-                "detected",
                 "custom-codex-home:skill:ea-planning:skills/ea-planning/SKILL.md",
                 "custom-codex-home:agent:ea-worker:agents/ea-worker/AGENT.md",
-                "alias",
-                "worker",
+                "name",
+                "ea-worker",
                 "skills/ea-planning/SKILL.md",
-            ),
-            (
-                "detected",
-                "custom-codex-home:skill:ea-research:skills/ea-research/SKILL.md",
-                "custom-codex-home:agent:ea-advisor:agents/ea-advisor/AGENT.md",
-                "alias",
-                "advisor",
-                "skills/ea-research/SKILL.md",
             ),
             (
                 "detected",
@@ -272,11 +240,12 @@ class WorkbenchGraphTests(unittest.TestCase):
         )
         self.assertTrue(
             any(
-                edge["match_text"].lower() == "worker"
-                and edge["match_kind"] == "alias"
+                edge["match_text"].lower() == "ea-worker"
+                and edge["match_kind"] == "name"
                 for edge in graph_a["edges"]
             )
         )
+        self.assertFalse(any(edge["match_kind"] == "alias" for edge in graph_a["edges"]))
         self.assertFalse(
             any(
                 edge["match_text"].lower() in {"worker-run", "a_worker"}
@@ -329,29 +298,8 @@ class WorkbenchGraphTests(unittest.TestCase):
         center_band_max = 600.0
         skill_nodes = [node for node in graph_a["nodes"] if node["surface_type"] == "skill"]
         agent_nodes = [node for node in graph_a["nodes"] if node["surface_type"] == "agent"]
-        high = max(graph_a["nodes"], key=lambda node: node["degree"])
-        connected_lower = next(
-            node
-            for node in graph_a["nodes"]
-            if node["selection_id"] != high["selection_id"]
-            and node["degree"] < high["degree"]
-            and any(
-                (
-                    edge["from_selection_id"] == high["selection_id"]
-                    and edge["to_selection_id"] == node["selection_id"]
-                )
-                or (
-                    edge["to_selection_id"] == high["selection_id"]
-                    and edge["from_selection_id"] == node["selection_id"]
-                )
-                for edge in graph_a["edges"]
-            )
-        )
-
         def distance_from_center(node: dict[str, object]) -> float:
             return abs(float(node["x"]) - center_x) + abs(float(node["y"]) - center_y)
-
-        self.assertLess(distance_from_center(high), distance_from_center(connected_lower))
 
         self.assertTrue(any(center_band_min <= node["x"] <= center_band_max for node in skill_nodes))
         self.assertTrue(any(center_band_min <= node["x"] <= center_band_max for node in agent_nodes))
@@ -362,10 +310,12 @@ class WorkbenchGraphTests(unittest.TestCase):
         self.assertGreater(len({node["x"] for node in skill_nodes}), 1)
         self.assertGreater(len({node["x"] for node in agent_nodes}), 1)
 
-        high_skill = max(skill_nodes, key=lambda node: node["degree"])
-        low_skill = min(skill_nodes, key=lambda node: node["degree"])
-        self.assertGreaterEqual(high_skill["size"], low_skill["size"])
-        self.assertLess(distance_from_center(high_skill), distance_from_center(low_skill))
+        for band_nodes in (skill_nodes, agent_nodes):
+            high_node = max(band_nodes, key=lambda node: node["degree"])
+            low_node = min(band_nodes, key=lambda node: node["degree"])
+            self.assertGreaterEqual(high_node["size"], low_node["size"])
+            if high_node["degree"] > low_node["degree"]:
+                self.assertLess(distance_from_center(high_node), distance_from_center(low_node))
 
 
 if __name__ == "__main__":

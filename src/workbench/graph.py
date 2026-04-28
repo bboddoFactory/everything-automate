@@ -359,7 +359,7 @@ def _find_best_match(text: str, target: dict[str, Any]) -> dict[str, str] | None
 def _candidate_terms(target: dict[str, Any]) -> list[str]:
     ordered: list[str] = []
     seen: set[str] = set()
-    for term in [target["logical_name"], target["name"], *sorted(target["aliases"], key=str.lower)]:
+    for term in [target["logical_name"], target["name"]]:
         key = term.lower()
         if key in seen:
             continue
